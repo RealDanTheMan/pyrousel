@@ -1,3 +1,4 @@
+import time
 import glfw
 import moderngl as mgl
 import moderngl_window as mglwin
@@ -18,6 +19,8 @@ class AppWindow(object):
         self.draw_wireframe = True
         self.draw_shaded = True
         self.enable_carousel = True
+        self.frame_counter = FrameCounter()
+        self.frame_counter.Start()
         
         # Initialise GLFW window & OpenGL context
         if not glfw.init():
@@ -93,6 +96,8 @@ class AppWindow(object):
         self.gui.scene_stats.num_triangles = len(self.model.indices) / 3
         self.gui.scene_stats.min_ext = self.model.minext
         self.gui.scene_stats.max_ext = self.model.maxext
+        self.gui.scene_stats.fps = self.frame_counter.GetFPS()
+        self.gui.scene_stats.frames = self.frame_counter.GetFrames()
 
         self.gui.overlays.wireframe_shaded = self.draw_shaded and self.draw_wireframe
         self.gui.overlays.wireframe_only = not self.draw_shaded and self.draw_wireframe
@@ -172,11 +177,52 @@ class AppWindow(object):
         """Updates & Draw active scene continusely until window closes"""
         while not glfw.window_should_close(self.__win):
             glfw.poll_events()
+            self.frame_counter.Update()
             self.__FetchUI()
             self.__UpdateUI()
             self.__UpdateScene()
             self.__RenderScene()
 
-    def Quit(self):
+    def Quit(self) -> None:
         self.gui.Shutdown()
         glfw.terminate()
+
+class FrameCounter(object):
+    def __init__(self, max_samples: int  = 32):
+        self.__current: float = 0.0
+        self.__last: float = 0.0
+        self.__frames: int = 0
+        self.__fps: int = 0
+        self.__max_samples: int = max_samples
+        self.__samples: List(float) = [0] * self.__max_samples
+        self.__sample_idx: int = 0
+
+    def Start(self) -> None:
+        """Start/Restart the timer"""
+        self.__current: float = 0.0
+        self.__last: float = 0.0
+        self.__frames: int = 0
+        self.__fps: int = 0
+        self.__samples = [0] * self.__max_samples
+        self.__sample_idx: int = 0
+
+    def Update(self) -> None:
+        """Take a frame time sample and update FPS and frame count"""
+        self.__last = self.__current
+        self.__current = time.time()
+        self.__samples[self.__sample_idx] = self.__current - self.__last
+        self.__frames += 1
+        self.__fps = int(1.0 / (sum(self.__samples) / self.__max_samples))
+
+        if self.__sample_idx < self.__max_samples - 1:
+            self.__sample_idx += 1
+        else:
+            self.__sample_idx = 0
+
+    def GetFPS(self) -> int:
+        """Returns current FPS"""
+        return int(self.__fps)
+
+    def GetFrames(self) -> int:
+        """Returns frame count since the counter start"""
+        return self.__frames

@@ -1,6 +1,7 @@
 import os
 import easygui
 import imgui
+from decimal import Decimal, ROUND_DOWN
 from imgui.integrations.glfw import GlfwRenderer as IMRenderer
 from glfw import _GLFWwindow
 from blinker import Signal
@@ -49,6 +50,7 @@ class AppGUI(object):
 class SceneStatsPanel(object):
     def __init__(self):
         self.fps = 0
+        self.frames = 0
         self.num_vertex: int = 0
         self.num_triangles: int = 0
         self.min_ext = [0.0, 0.0, 0.0]
@@ -60,6 +62,9 @@ class SceneStatsPanel(object):
             imgui.text('FPS: ')
             imgui.same_line(position=200)
             imgui.text(str(self.fps))
+            imgui.text('Frames: ')
+            imgui.same_line(position=200)
+            imgui.text(str(self.frames))
             imgui.text('Vertices: ')
             imgui.same_line(position=200)
             imgui.text(str(int(self.num_vertex)))
@@ -68,18 +73,18 @@ class SceneStatsPanel(object):
             imgui.text(str(int(self.num_triangles)))
             imgui.text('Min Extends: ')
             imgui.same_line(position=200)
-            imgui.text(str(self.min_ext[0]))
+            imgui.text(str(Decimal(self.min_ext[0]).quantize(Decimal('1.00'), ROUND_DOWN)))
             imgui.same_line()
-            imgui.text(str(self.min_ext[1]))
+            imgui.text(str(Decimal(self.min_ext[1]).quantize(Decimal('1.00'), ROUND_DOWN)))
             imgui.same_line()
-            imgui.text(str(self.min_ext[2]))
+            imgui.text(str(Decimal(self.min_ext[2]).quantize(Decimal('1.00'), ROUND_DOWN)))
             imgui.text('Mix Extends: ')
             imgui.same_line(position=200)
-            imgui.text(str(self.max_ext[0]))
+            imgui.text(str(Decimal(self.max_ext[0]).quantize(Decimal('1.00'), ROUND_DOWN)))
             imgui.same_line()
-            imgui.text(str(self.max_ext[1]))
+            imgui.text(str(Decimal(self.max_ext[1]).quantize(Decimal('1.00'), ROUND_DOWN)))
             imgui.same_line()
-            imgui.text(str(self.max_ext[2]))
+            imgui.text(str(Decimal(self.max_ext[2]).quantize(Decimal('1.00'), ROUND_DOWN)))
             imgui.tree_pop()
         imgui.separator()
 
