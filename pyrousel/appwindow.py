@@ -134,6 +134,12 @@ class AppWindow(object):
             tr_y = self.gui.transforms.translation[1]
             tr_z = self.gui.transforms.translation[2]
             self.model.transform.SetTranslation(tr_x, tr_y, tr_z)
+
+            if not self.enable_carousel:
+                rot_x = np.radians(self.gui.transforms.rotation[0])
+                rot_y = np.radians(self.gui.transforms.rotation[1])
+                rot_z = np.radians(self.gui.transforms.rotation[2])
+                self.model.transform.SetRotation(rot_x, rot_y, rot_z)
             
             scale_x = self.gui.transforms.scale[0]
             scale_y = self.gui.transforms.scale[1]
