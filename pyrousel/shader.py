@@ -56,9 +56,9 @@ class ShaderWireframeFallback(ShaderBase):
                 uniform mat4 modelTransform;
                 uniform mat4 viewTransform;
                 uniform mat4 perspectiveTransform;
-                uniform vec3 color;
+                uniform vec4 color;
 
-                out vec3 wireColor;
+                out vec4 wireColor;
 
                 void main() {
                     mat4 mvp = perspectiveTransform * viewTransform * modelTransform;
@@ -70,10 +70,10 @@ class ShaderWireframeFallback(ShaderBase):
         self.fragment_source: str = '''
                 #version 330
 
-                in vec3 wireColor;
+                in vec4 wireColor;
                 out vec4 f_color;
 
                 void main() {
-                    f_color = vec4(wireColor, 1.0);
+                    f_color = wireColor;
                 }
             '''

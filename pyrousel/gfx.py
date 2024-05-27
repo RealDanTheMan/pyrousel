@@ -8,6 +8,8 @@ class GFX(object):
     def __init__(self, ctx: mgl.Context):
         self.__ctx = ctx
         self.__ctx.enable(mgl.DEPTH_TEST)
+        self.__ctx.enable(mgl.BLEND)
+        self.__ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
         self.view_matrix: Matrix44 = Matrix44.identity().astype('float32')
         self.perspective_matrix: Matrix44  = Matrix44.identity().astype('float32')
 
@@ -151,7 +153,7 @@ class GFX(object):
         renderable.program['modelTransform'].write(mat.tobytes())
         renderable.program['viewTransform'].write(self.view_matrix.tobytes())
         renderable.program['perspectiveTransform'].write(self.perspective_matrix.tobytes())
-        renderable.program['color'] = (1.0, 0.0, 0.0)
+        renderable.program['color'] = (0.66, 0.66, 0.66, 0.1)
 
         self.GetContext().wireframe = True
         self.GetContext().polygon_offset = (-10,-10)
