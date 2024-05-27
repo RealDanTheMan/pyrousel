@@ -1,0 +1,6 @@
+*.pyc
+*.pyo
+bin/
+build/
+dist/
+eggs/
