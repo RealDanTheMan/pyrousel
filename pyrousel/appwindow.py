@@ -15,7 +15,7 @@ class AppWindow(object):
         self.__width = width
         self.__height = height
         self.__aspec_ratio = self.__width / self.__height
-        self.draw_wireframe = False
+        self.draw_wireframe = True
         self.draw_shaded = True
         self.enable_carousel = True
         
@@ -93,6 +93,9 @@ class AppWindow(object):
         self.gui.scene_stats.num_triangles = len(self.model.indices) / 3
         self.gui.scene_stats.min_ext = self.model.minext
         self.gui.scene_stats.max_ext = self.model.maxext
+
+        self.gui.overlays.wireframe_shaded = self.draw_shaded and self.draw_wireframe
+        self.gui.overlays.wireframe_only = not self.draw_shaded and self.draw_wireframe
         
         self.gui.camera_settings.fov = self.camera.fov
         self.gui.camera_settings.near_plane = self.camera.near_clip
