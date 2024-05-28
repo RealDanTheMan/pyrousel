@@ -7,6 +7,7 @@ class Model(object):
         self.vertices: List(np.array) = np.array([], dtype='f4')
         self.normals: List(np.array) = np.array([], dtype='f4')
         self.indices: List(np.array) = np.array([], dtype='i4')
+        self.texcoords: List(np.array) = np.array([], dtype='f4')
         self.transform: Transform = Transform()
         self.minext: Vector3 = Vector3([0.0, 0.0, 0.0])
         self.maxext: Vector3 = Vector3([0.0, 0.0, 0.0])
@@ -27,6 +28,7 @@ class RenderModel(Model):
         self.shader = None
         self.vertex_buffer = None
         self.normal_buffer = None
+        self.texcoord_buffer = None
         self.index_buffer = None
         self.vertex_array = None
 
@@ -159,6 +161,7 @@ class ModelLoader():
         """
         vertices = []
         normals = []
+        texcoords = []
         indices = []
         with open(filepath, 'r') as file:
             for line in file:
@@ -176,6 +179,12 @@ class ModelLoader():
                     normals.append(data[0])
                     normals.append(data[1])
                     normals.append(data[2])
+                elif line.startswith('vt '):
+                    data = list(map(float, line.strip().split()[1:]))
+                    if(len(data) != 3):
+                        raise Exception("Texcoord format is invalid!")
+                    texcoords.append(data[0])
+                    texcoords.append(data[1])
                 elif line.startswith('f '):
                     facedata = line.strip().split()[1:]
                     if(len(facedata) != 3):
@@ -186,5 +195,6 @@ class ModelLoader():
         model = RenderModel()
         model.vertices = np.array(vertices, dtype='f4')
         model.normals = np.array(normals, dtype='f4')
+        model.texcoords = np.array(texcoords, dtype='f4')
         model.indices = np.array(indices, dtype='i4')
         return model
