@@ -13,6 +13,7 @@ setup(
         # python-imgui
         # python-easygui
         # python-blinker
+        # python-trimesh
     ],
     entry_points={
         'console_scripts': [

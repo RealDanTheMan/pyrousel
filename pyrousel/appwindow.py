@@ -43,7 +43,7 @@ class AppWindow(object):
         """Initialises OpenGL graphics renderer"""
         self.graphics = GFX(mgl.create_context())
 
-        self.__LoadModel('resources/models/obj/ChessKing.obj')
+        self.__LoadModel('resources/models/obj/monkey.obj')
         self.camera = Camera()
         self.camera.aspect = self.__aspec_ratio
         self.camera.transform.Translate(0.0, 0.0, 5.0)
@@ -73,7 +73,7 @@ class AppWindow(object):
     def __LoadModel(self, filepath: str) -> None:
         """Loads given model into the active scene"""
         self.model_filepath = filepath
-        self.model = ModelLoader.LoadFromOBJ(filepath)
+        self.model = ModelLoader.LoadModel(filepath)
         self.model.RecomputeBounds()
         self.graphics.GenModelBuffers(self.model)
 

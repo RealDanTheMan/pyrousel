@@ -1,4 +1,5 @@
 import numpy as np
+import trimesh
 from pyrr import Matrix44, Vector3
 from pyrousel.transform import Transform
 
@@ -181,7 +182,7 @@ class ModelLoader():
                     normals.append(data[2])
                 elif line.startswith('vt '):
                     data = list(map(float, line.strip().split()[1:]))
-                    if(len(data) != 3):
+                    if(len(data) < 2):
                         raise Exception("Texcoord format is invalid!")
                     texcoords.append(data[0])
                     texcoords.append(data[1])
@@ -198,3 +199,40 @@ class ModelLoader():
         model.texcoords = np.array(texcoords, dtype='f4')
         model.indices = np.array(indices, dtype='i4')
         return model
+    
+    @staticmethod
+    def LoadModel(filepath: str) -> RenderModel:
+        """
+        Loads model from wide variety of formats via Trimesh library
+
+        See https://trimesh.org/ for list of supported formats
+        
+        Parameters
+        ----------
+        filepath : str
+            Filepath to the OBJ file containing the model data
+
+        Returns
+        -------
+        RenderModel object representing OBJ model
+        """
+        vertices = []
+        normals = []
+        texcoords = []
+        indices = []
+
+        mesh = trimesh.load(filepath, force='mesh')
+        vertices = mesh.vertices.flatten()
+        indices = mesh.faces.flatten()
+        normals = mesh.vertex_normals.flatten()
+
+        if mesh.visual.uv is not None:
+            texcoords = mesh.visual.uv.flatten()
+
+        model = RenderModel()
+        model.vertices = np.array(vertices, dtype='f4')
+        model.normals = np.array(normals, dtype='f4')
+        model.texcoords = np.array(texcoords, dtype='f4')
+        model.indices = np.array(indices, dtype='i4')
+        return model
+
