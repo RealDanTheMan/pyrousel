@@ -206,7 +206,7 @@ class ModelLoader():
         Loads model from wide variety of formats via Trimesh library
 
         See https://trimesh.org/ for list of supported formats
-        
+
         Parameters
         ----------
         filepath : str
@@ -221,12 +221,12 @@ class ModelLoader():
         texcoords = []
         indices = []
 
-        mesh = trimesh.load(filepath, force='mesh')
+        mesh = trimesh.load(filepath, force='mesh', process=False)
         vertices = mesh.vertices.flatten()
         indices = mesh.faces.flatten()
         normals = mesh.vertex_normals.flatten()
 
-        if mesh.visual.uv is not None:
+        if hasattr(mesh.visual, 'uv') and mesh.visual.uv is not None:
             texcoords = mesh.visual.uv.flatten()
 
         model = RenderModel()
