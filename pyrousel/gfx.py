@@ -1,8 +1,14 @@
 import numpy as np
+from dataclasses import dataclass
 from pyrr import Matrix44, Vector3
 import moderngl as mgl
 from pyrousel.shader import ShaderBase, ShaderFallback, ShaderWireframeFallback
 from pyrousel.model import RenderModel
+
+@dataclass
+class RenderHints:
+    visualise_normals: bool = False
+    visualise_texcoords: bool = False
 
 class GFX(object):
     def __init__(self, ctx: mgl.Context):
@@ -77,11 +83,29 @@ class GFX(object):
         model : RenderModel
             Model to generate buffers for
         """
+
+        # Geometry vertices & triangle indices are required
         model.vertex_buffer = self.GetContext().buffer(model.vertices)
-        model.normal_buffer = self.GetContext().buffer(model.normals)
         model.index_buffer = self.GetContext().buffer(model.indices)
 
-    def DrawModel(self, model: RenderModel):
+        # Geometry data such as normals, texture coordinates, etc. are optional
+        # When such data is not available we generated placeholder data to make
+        # sure our model remains compatible with our shading pipepline.
+        if len(model.normals) > 0:
+            model.normal_buffer = self.GetContext().buffer(model.normals)
+        else:
+            size = len(model.vertices)
+            dummy_normals = np.array([1.0] * size, dtype='f4')
+            model.normal_buffer = self.GetContext().buffer(dummy_normals)
+
+        if len(model.texcoords) > 0:
+            model.texcoord_buffer = self.GetContext().buffer(model.texcoords)
+        else:
+            size = int((len(model.vertices) / 3) * 2)
+            dummy_texcoords = np.array([0.0] * size, dtype='f4')
+            model.texcoord_buffer = self.GetContext().buffer(dummy_texcoords)
+
+    def DrawModel(self, model: RenderModel, hints: RenderHints):
         """
         Draws given model to the screen
 
@@ -97,13 +121,16 @@ class GFX(object):
         ----------
         model : RenderModel
             Model to draw to screen
+        hints: RenderHints
+            Flags defining rendering behaviour
         """
         transform = model.transform.GetMatrix()
 
         # Vertex attribute layout (pos, normal)
         attribs = [
             (model.vertex_buffer, '3f', 'in_position'),
-            (model.normal_buffer, '3f', 'in_normal')
+            (model.normal_buffer, '3f', 'in_normal'),
+            (model.texcoord_buffer, '2f', 'in_texcoord')
         ]
 
         shader_program = self.def_shader
@@ -119,6 +146,10 @@ class GFX(object):
         renderable.program['modelTransform'].write(transform.tobytes())
         renderable.program['viewTransform'].write(self.view_matrix.tobytes())
         renderable.program['perspectiveTransform'].write(self.perspective_matrix.tobytes())
+        renderable.program['visualise_normals'] = float(hints.visualise_normals)
+        renderable.program['visualise_texcoords'] = float(hints.visualise_texcoords)
+        
+        
         self.GetContext().wireframe = False
         self.GetContext().polygon_offset = (0,0)
         renderable.render()

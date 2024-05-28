@@ -6,7 +6,7 @@ import numpy as np
 import math
 from pyrr import vector3, Vector3
 from pyrousel.appgui import AppGUI
-from pyrousel.gfx import GFX
+from pyrousel.gfx import GFX, RenderHints
 from pyrousel.shader import ShaderFallback
 from pyrousel.model import RenderModel, PrimitiveFactory, ModelLoader
 from pyrousel.camera import Camera
@@ -18,6 +18,7 @@ class AppWindow(object):
         self.__aspec_ratio = self.__width / self.__height
         self.draw_wireframe = True
         self.draw_shaded = True
+        self.render_hints = RenderHints()
         self.enable_carousel = True
         self.frame_counter = FrameCounter()
         self.frame_counter.Start()
@@ -101,6 +102,8 @@ class AppWindow(object):
 
         self.gui.overlays.wireframe_shaded = self.draw_shaded and self.draw_wireframe
         self.gui.overlays.wireframe_only = not self.draw_shaded and self.draw_wireframe
+        self.gui.overlays.visualise_normals = self.render_hints.visualise_normals
+        self.gui.overlays.visualise_texcoords = self.render_hints.visualise_texcoords
         
         self.gui.camera_settings.fov = self.camera.fov
         self.gui.camera_settings.near_plane = self.camera.near_clip
@@ -122,6 +125,8 @@ class AppWindow(object):
 
     def __FetchUI(self) -> None:
         """Fetches property values from UI that influence the app behaviour"""
+        self.render_hints.visualise_normals = self.gui.overlays.visualise_normals
+        self.render_hints.visualise_texcoords = self.gui.overlays.visualise_texcoords
         if self.gui.overlays.wireframe_only:
             self.draw_shaded = False
             self.draw_wireframe = True
@@ -166,7 +171,7 @@ class AppWindow(object):
         self.graphics.SetPerspectiveMatrix(self.camera.GetPerspectiveMatrix())
 
         if self.draw_shaded:
-            self.graphics.DrawModel(self.model)
+            self.graphics.DrawModel(self.model, self.render_hints)
         if self.draw_wireframe:
             self.graphics.DrawModelWire(self.model)
 

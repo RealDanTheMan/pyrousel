@@ -92,6 +92,8 @@ class OverlaysPanel(object):
     def __init__(self):
         self.wireframe_only = False
         self.wireframe_shaded = False
+        self.visualise_normals = False
+        self.visualise_texcoords = False
 
     def Update(self) -> None:
         """Builds IMGui widgest that make this panel"""
@@ -102,6 +104,12 @@ class OverlaysPanel(object):
             imgui.text('Wireframe Only:')
             imgui.same_line(position=200)
             _, self.wireframe_only = imgui.checkbox('##Wireframe Only', self.wireframe_only)
+            imgui.text('Visualise normals:')
+            imgui.same_line(position=200)
+            _, self.visualise_normals = imgui.checkbox('##Visualise Normals', self.visualise_normals)
+            imgui.text('Visualise Texcoords:')
+            imgui.same_line(position=200)
+            _, self.visualise_texcoords = imgui.checkbox('##Visualise Texcoords', self.visualise_texcoords)
             imgui.tree_pop()
         imgui.separator()
 
