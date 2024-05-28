@@ -2,7 +2,7 @@ import numpy as np
 from dataclasses import dataclass
 from pyrr import Matrix44, Vector3
 import moderngl as mgl
-from pyrousel.shader import ShaderSource, ShaderFallback, ShaderWireframeFallback
+from pyrousel.shader import ShaderSource
 from pyrousel.model import RenderModel
 
 @dataclass

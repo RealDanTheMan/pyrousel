@@ -7,7 +7,6 @@ import math
 from pyrr import vector3, Vector3
 from pyrousel.appgui import AppGUI
 from pyrousel.gfx import GFX, RenderHints
-from pyrousel.shader import ShaderFallback
 from pyrousel.model import RenderModel, PrimitiveFactory, ModelLoader
 from pyrousel.camera import Camera
 
