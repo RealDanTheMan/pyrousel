@@ -2,7 +2,7 @@ import numpy as np
 from dataclasses import dataclass
 from pyrr import Matrix44, Vector3
 import moderngl as mgl
-from pyrousel.shader import ShaderBase, ShaderFallback, ShaderWireframeFallback
+from pyrousel.shader import ShaderSource, ShaderFallback, ShaderWireframeFallback
 from pyrousel.model import RenderModel
 
 @dataclass
@@ -19,8 +19,18 @@ class GFX(object):
         self.view_matrix: Matrix44 = Matrix44.identity().astype('float32')
         self.perspective_matrix: Matrix44  = Matrix44.identity().astype('float32')
 
-        self.def_shader = self.CompileShaderProgram(ShaderFallback())
-        self.def_wire_shader = self.CompileShaderProgram(ShaderWireframeFallback())
+        def_shader_src = ShaderSource.LoadFromFile(
+            'resources/shaders/default.vs', 
+            'resources/shaders/default.fs'
+        )
+
+        def_wireshader_src = ShaderSource.LoadFromFile(
+            'resources/shaders/wireframe.vs', 
+            'resources/shaders/wireframe.fs'
+        )
+
+        self.def_shader = self.CompileShaderProgram(def_shader_src)
+        self.def_wire_shader = self.CompileShaderProgram(def_wireshader_src)
 
     def GetContext(self) -> mgl.Context:
         """
@@ -40,7 +50,7 @@ class GFX(object):
         """
         self.perspective_matrix = perspmat.astype('float32')
 
-    def CompileShaderProgram(self, shader: ShaderBase) -> mgl.Program:
+    def CompileShaderProgram(self, shader: ShaderSource) -> mgl.Program:
         """
         Compiles given shader source and returns GLSL program handle
 
