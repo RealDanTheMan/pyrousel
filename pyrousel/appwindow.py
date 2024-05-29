@@ -46,6 +46,7 @@ class AppWindow(object):
         self.__LoadModel('resources/models/obj/monkey.obj')
         self.camera = Camera()
         self.camera.aspect = self.__aspec_ratio
+        self.camera.fov = 30.0
         self.camera.transform.Translate(0.0, 0.0, 5.0)
         self.__FrameModel()
         self.__UpdateUI()
