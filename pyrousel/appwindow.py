@@ -1,3 +1,4 @@
+import os
 import time
 import glfw
 import moderngl as mgl
@@ -43,7 +44,7 @@ class AppWindow(object):
         """Initialises OpenGL graphics renderer"""
         self.graphics = GFX(mgl.create_context())
 
-        self.__LoadModel('resources/models/obj/monkey.obj')
+        self.__LoadModel(os.path.join(os.getcwd(), 'resources/models/obj/monkey.obj'))
         self.camera = Camera()
         self.camera.aspect = self.__aspec_ratio
         self.camera.fov = 30.0
@@ -104,6 +105,7 @@ class AppWindow(object):
         self.gui.overlays.wireframe_only = not self.draw_shaded and self.draw_wireframe
         self.gui.overlays.visualise_normals = self.render_hints.visualise_normals
         self.gui.overlays.visualise_texcoords = self.render_hints.visualise_texcoords
+        self.gui.overlays.visualise_colors = self.render_hints.visualise_colors
         
         self.gui.camera_settings.fov = self.camera.fov
         self.gui.camera_settings.near_plane = self.camera.near_clip
@@ -127,6 +129,7 @@ class AppWindow(object):
         """Fetches property values from UI that influence the app behaviour"""
         self.render_hints.visualise_normals = self.gui.overlays.visualise_normals
         self.render_hints.visualise_texcoords = self.gui.overlays.visualise_texcoords
+        self.render_hints.visualise_colors = self.gui.overlays.visualise_colors
         if self.gui.overlays.wireframe_only:
             self.draw_shaded = False
             self.draw_wireframe = True

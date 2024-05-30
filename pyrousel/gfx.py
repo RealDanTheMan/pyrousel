@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from dataclasses import dataclass
 from pyrr import Matrix44, Vector3
@@ -9,6 +10,7 @@ from pyrousel.model import RenderModel
 class RenderHints:
     visualise_normals: bool = False
     visualise_texcoords: bool = False
+    visualise_colors: bool = False
 
 class GFX(object):
     def __init__(self, ctx: mgl.Context):
@@ -20,13 +22,13 @@ class GFX(object):
         self.perspective_matrix: Matrix44  = Matrix44.identity().astype('float32')
 
         def_shader_src = ShaderSource.LoadFromFile(
-            'resources/shaders/default.vs', 
-            'resources/shaders/default.fs'
+            os.path.join(os.getcwd(), 'resources/shaders/default.vs'), 
+            os.path.join(os.getcwd(), 'resources/shaders/default.fs')
         )
 
         def_wireshader_src = ShaderSource.LoadFromFile(
-            'resources/shaders/wireframe.vs', 
-            'resources/shaders/wireframe.fs'
+            os.path.join(os.getcwd(), 'resources/shaders/wireframe.vs'), 
+            os.path.join(os.getcwd(), 'resources/shaders/wireframe.fs')
         )
 
         self.def_shader = self.CompileShaderProgram(def_shader_src)
@@ -114,6 +116,26 @@ class GFX(object):
             size = int((len(model.vertices) / 3) * 2)
             dummy_texcoords = np.array([0.0] * size, dtype='f4')
             model.texcoord_buffer = self.GetContext().buffer(dummy_texcoords)
+        
+        if len(model.colors) > 0:
+            model.color_buffer = self.GetContext().buffer(model.colors)
+        else:
+            size = len(model.vertices)
+            dummy_colors = np.array([1.0] * size, dtype='f4')
+            model.color_buffer = self.GetContext().buffer(dummy_colors)
+        self.__ValidateModelBuffers(model)
+
+    def __ValidateModelBuffers(self, model: RenderModel) -> None:
+        if model.vertex_buffer is None:
+            raise Exception('Invalid vertex buffer handle!')
+        if model.index_buffer is None:
+            raise Exception('Invalid index buffer handle!')
+        if model.normal_buffer is None:
+            raise Exception('Invalid normal buffer handle!')
+        if model.texcoord_buffer is None:
+            raise Exception('Invalid texcoord  buffer handle!')
+        if model.color_buffer is None:
+            raise Exception('Invalid color  buffer handle!')
 
     def DrawModel(self, model: RenderModel, hints: RenderHints):
         """
@@ -140,7 +162,8 @@ class GFX(object):
         attribs = [
             (model.vertex_buffer, '3f', 'in_position'),
             (model.normal_buffer, '3f', 'in_normal'),
-            (model.texcoord_buffer, '2f', 'in_texcoord')
+            (model.texcoord_buffer, '2f', 'in_texcoord'),
+            (model.color_buffer, '3f', 'in_color')
         ]
 
         shader_program = self.def_shader
@@ -158,6 +181,7 @@ class GFX(object):
         renderable.program['perspectiveTransform'].write(self.perspective_matrix.tobytes())
         renderable.program['visualise_normals'] = float(hints.visualise_normals)
         renderable.program['visualise_texcoords'] = float(hints.visualise_texcoords)
+        renderable.program['visualise_colors'] = float(hints.visualise_colors)
         
         
         self.GetContext().wireframe = False

@@ -94,6 +94,7 @@ class OverlaysPanel(object):
         self.wireframe_shaded = False
         self.visualise_normals = False
         self.visualise_texcoords = False
+        self.visualise_colors = False
 
     def Update(self) -> None:
         """Builds IMGui widgest that make this panel"""
@@ -110,6 +111,9 @@ class OverlaysPanel(object):
             imgui.text('Visualise Texcoords:')
             imgui.same_line(position=200)
             _, self.visualise_texcoords = imgui.checkbox('##Visualise Texcoords', self.visualise_texcoords)
+            imgui.text('Visualise Vertex Color:')
+            imgui.same_line(position=200)
+            _, self.visualise_colors = imgui.checkbox('##Visualise Colors', self.visualise_colors)
             imgui.tree_pop()
         imgui.separator()
 
