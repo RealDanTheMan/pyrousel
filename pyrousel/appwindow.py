@@ -15,8 +15,6 @@ class AppWindow(object):
         self.__width = width
         self.__height = height
         self.__aspec_ratio = self.__width / self.__height
-        self.draw_wireframe = True
-        self.draw_shaded = True
         self.render_hints = RenderHints()
         self.enable_carousel = True
         self.frame_counter = FrameCounter()
@@ -100,8 +98,8 @@ class AppWindow(object):
         self.gui.scene_stats.fps = self.frame_counter.GetFPS()
         self.gui.scene_stats.frames = self.frame_counter.GetFrames()
 
-        self.gui.overlays.wireframe_shaded = self.draw_shaded and self.draw_wireframe
-        self.gui.overlays.wireframe_only = not self.draw_shaded and self.draw_wireframe
+        self.gui.overlays.wireframe_shaded = self.render_hints.draw_shaded and self.render_hints.draw_wireframe
+        self.gui.overlays.wireframe_only = not self.render_hints.draw_shaded and self.render_hints.draw_wireframe
         self.gui.overlays.visualise_normals = self.render_hints.visualise_normals
         self.gui.overlays.visualise_texcoords = self.render_hints.visualise_texcoords
         self.gui.overlays.visualise_colors = self.render_hints.visualise_colors
@@ -130,14 +128,14 @@ class AppWindow(object):
         self.render_hints.visualise_texcoords = self.gui.overlays.visualise_texcoords
         self.render_hints.visualise_colors = self.gui.overlays.visualise_colors
         if self.gui.overlays.wireframe_only:
-            self.draw_shaded = False
-            self.draw_wireframe = True
+            self.render_hints.draw_shaded = False
+            self.render_hints.draw_wireframe = True
         elif self.gui.overlays.wireframe_shaded:
-            self.draw_shaded = True
-            self.draw_wireframe = True
+            self.render_hints.draw_shaded = True
+            self.render_hints.draw_wireframe = True
         else:
-            self.draw_shaded = True
-            self.draw_wireframe = False
+            self.render_hints.draw_shaded = True
+            self.render_hints.draw_wireframe = False
 
         self.camera.fov = self.gui.camera_settings.fov
         self.camera.near_clip = self.gui.camera_settings.near_plane
@@ -171,12 +169,7 @@ class AppWindow(object):
         self.graphics.ClearScreen(0.1, 0.1, 0.1)
         self.graphics.SetViewMatrix(self.camera.GetViewMatrix())
         self.graphics.SetPerspectiveMatrix(self.camera.GetPerspectiveMatrix())
-
-        if self.draw_shaded:
-            self.graphics.DrawModel(self.model, self.render_hints)
-        if self.draw_wireframe:
-            self.graphics.DrawModelWire(self.model)
-
+        self.graphics.RenderModel(self.model, self.render_hints)
         self.gui.Render()
         glfw.swap_buffers(self.__win)
 

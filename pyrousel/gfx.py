@@ -8,6 +8,8 @@ from pyrousel.model import RenderModel
 
 @dataclass
 class RenderHints:
+    draw_shaded = True
+    draw_wireframe = True
     visualise_normals: bool = False
     visualise_texcoords: bool = False
     visualise_colors: bool = False
@@ -137,7 +139,17 @@ class GFX(object):
         if model.color_buffer is None:
             raise Exception('Invalid color  buffer handle!')
 
-    def DrawModel(self, model: RenderModel, hints: RenderHints):
+    def RenderModel(self, model: RenderModel, hints: RenderHints) -> None:
+        if model is None:
+            return
+        
+        if hints.draw_shaded:
+            self.__DrawModel(model, hints)
+
+        if hints.draw_wireframe:
+            self.__DrawModelWire(model)
+
+    def __DrawModel(self, model: RenderModel, hints: RenderHints):
         """
         Draws given model to the screen
 
@@ -188,7 +200,7 @@ class GFX(object):
         self.GetContext().polygon_offset = (0,0)
         renderable.render()
 
-    def DrawModelWire(self, model: RenderModel):
+    def __DrawModelWire(self, model: RenderModel):
         """
         Draws given model wireframe to the screen
 
