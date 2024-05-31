@@ -2,7 +2,6 @@ import os
 import time
 import glfw
 import moderngl as mgl
-import moderngl_window as mglwin
 import numpy as np
 import math
 from pyrr import vector3, Vector3
