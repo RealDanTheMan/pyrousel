@@ -4,7 +4,7 @@ import glfw
 import moderngl as mgl
 import numpy as np
 import math
-from pyrr import vector3, Vector3
+from pyrr import vector3, Vector3, Vector4
 from pyrousel.appgui import AppGUI
 from pyrousel.gfx import GFX, RenderHints
 from pyrousel.model import RenderModel, PrimitiveFactory, ModelLoader
@@ -100,6 +100,7 @@ class AppWindow(object):
 
         self.gui.overlays.wireframe_shaded = self.render_hints.draw_shaded and self.render_hints.draw_wireframe
         self.gui.overlays.wireframe_only = not self.render_hints.draw_shaded and self.render_hints.draw_wireframe
+        self.gui.overlays.wireframe_color = list(self.render_hints.wireframe_color)
         self.gui.overlays.visualise_normals = self.render_hints.visualise_normals
         self.gui.overlays.visualise_texcoords = self.render_hints.visualise_texcoords
         self.gui.overlays.visualise_colors = self.render_hints.visualise_colors
@@ -127,6 +128,8 @@ class AppWindow(object):
         self.render_hints.visualise_normals = self.gui.overlays.visualise_normals
         self.render_hints.visualise_texcoords = self.gui.overlays.visualise_texcoords
         self.render_hints.visualise_colors = self.gui.overlays.visualise_colors
+        self.render_hints.wireframe_color = Vector4(self.gui.overlays.wireframe_color)
+        
         if self.gui.overlays.wireframe_only:
             self.render_hints.draw_shaded = False
             self.render_hints.draw_wireframe = True

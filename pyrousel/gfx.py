@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from dataclasses import dataclass
-from pyrr import Matrix44, Vector3
+from pyrr import Matrix44, Vector3, Vector4
 import moderngl as mgl
 from pyrousel.shader import ShaderSource
 from pyrousel.model import RenderModel
@@ -10,6 +10,7 @@ from pyrousel.model import RenderModel
 class RenderHints:
     draw_shaded = True
     draw_wireframe = True
+    wireframe_color = Vector4([0.0, 1.0, 0.0, 1.0])
     visualise_normals: bool = False
     visualise_texcoords: bool = False
     visualise_colors: bool = False
@@ -147,9 +148,9 @@ class GFX(object):
             self.__DrawModel(model, hints)
 
         if hints.draw_wireframe:
-            self.__DrawModelWire(model)
+            self.__DrawModelWire(model, hints.wireframe_color)
 
-    def __DrawModel(self, model: RenderModel, hints: RenderHints):
+    def __DrawModel(self, model: RenderModel, hints: RenderHints) -> None:
         """
         Draws given model to the screen
 
@@ -200,7 +201,7 @@ class GFX(object):
         self.GetContext().polygon_offset = (0,0)
         renderable.render()
 
-    def __DrawModelWire(self, model: RenderModel):
+    def __DrawModelWire(self, model: RenderModel, color: Vector4) -> None:
         """
         Draws given model wireframe to the screen
 
@@ -213,6 +214,8 @@ class GFX(object):
         ----------
         model : RenderModel
             Model to draw wireframe from to screen
+        coloe : Vector3
+            Color (RGBA) of the wireframe lines
         """
         mat = model.transform.GetMatrix()
 
@@ -230,7 +233,7 @@ class GFX(object):
         renderable.program['modelTransform'].write(mat.tobytes())
         renderable.program['viewTransform'].write(self.view_matrix.tobytes())
         renderable.program['perspectiveTransform'].write(self.perspective_matrix.tobytes())
-        renderable.program['color'] = (0.66, 0.66, 0.66, 0.1)
+        renderable.program['color'] = color
 
         self.GetContext().wireframe = True
         self.GetContext().polygon_offset = (-10,-10)

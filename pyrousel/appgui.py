@@ -92,6 +92,7 @@ class OverlaysPanel(object):
     def __init__(self):
         self.wireframe_only = False
         self.wireframe_shaded = False
+        self.wireframe_color = [1.0, 1.0, 1.0, 1.0]
         self.visualise_normals = False
         self.visualise_texcoords = False
         self.visualise_colors = False
@@ -105,6 +106,15 @@ class OverlaysPanel(object):
             imgui.text('Wireframe Only:')
             imgui.same_line(position=200)
             _, self.wireframe_only = imgui.checkbox('##Wireframe Only', self.wireframe_only)
+            imgui.text('Wireframe Color:')
+            imgui.same_line(position=200)
+            _, self.wireframe_color = imgui.input_float4(
+                '##Wireframe color',
+                self.wireframe_color[0],
+                self.wireframe_color[1],
+                self.wireframe_color[2],
+                self.wireframe_color[3]
+            )
             imgui.text('Visualise normals:')
             imgui.same_line(position=200)
             _, self.visualise_normals = imgui.checkbox('##Visualise Normals', self.visualise_normals)
