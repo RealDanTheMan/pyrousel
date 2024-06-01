@@ -16,6 +16,7 @@ class AppWindow(object):
         self.__height = height
         self.__aspec_ratio = self.__width / self.__height
         self.render_hints = RenderHints()
+        self.render_hints.wireframe_color = Vector4([0.0, 0.55, 0.0, 0.22])
         self.enable_carousel = True
         self.frame_counter = FrameCounter()
         self.frame_counter.Start()
