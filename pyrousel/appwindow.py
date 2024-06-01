@@ -98,12 +98,9 @@ class AppWindow(object):
         self.gui.scene_stats.fps = self.frame_counter.GetFPS()
         self.gui.scene_stats.frames = self.frame_counter.GetFrames()
 
-        self.gui.overlays.wireframe_shaded = self.render_hints.draw_shaded and self.render_hints.draw_wireframe
-        self.gui.overlays.wireframe_only = not self.render_hints.draw_shaded and self.render_hints.draw_wireframe
+        self.gui.overlays.wireframe_mode = self.render_hints.wireframe_mode
+        self.gui.overlays.visualise_state = self.render_hints.visualiser_mode
         self.gui.overlays.wireframe_color = list(self.render_hints.wireframe_color)
-        self.gui.overlays.visualise_normals = self.render_hints.visualise_normals
-        self.gui.overlays.visualise_texcoords = self.render_hints.visualise_texcoords
-        self.gui.overlays.visualise_colors = self.render_hints.visualise_colors
         
         self.gui.camera_settings.fov = self.camera.fov
         self.gui.camera_settings.near_plane = self.camera.near_clip
@@ -125,20 +122,9 @@ class AppWindow(object):
 
     def __FetchUI(self) -> None:
         """Fetches property values from UI that influence the app behaviour"""
-        self.render_hints.visualise_normals = self.gui.overlays.visualise_normals
-        self.render_hints.visualise_texcoords = self.gui.overlays.visualise_texcoords
-        self.render_hints.visualise_colors = self.gui.overlays.visualise_colors
+        self.render_hints.visualiser_mode = self.gui.overlays.visualiser_mode
+        self.render_hints.wireframe_mode = self.gui.overlays.wireframe_mode
         self.render_hints.wireframe_color = Vector4(self.gui.overlays.wireframe_color)
-        
-        if self.gui.overlays.wireframe_only:
-            self.render_hints.draw_shaded = False
-            self.render_hints.draw_wireframe = True
-        elif self.gui.overlays.wireframe_shaded:
-            self.render_hints.draw_shaded = True
-            self.render_hints.draw_wireframe = True
-        else:
-            self.render_hints.draw_shaded = True
-            self.render_hints.draw_wireframe = False
 
         self.camera.fov = self.gui.camera_settings.fov
         self.camera.near_clip = self.gui.camera_settings.near_plane

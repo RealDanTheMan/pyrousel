@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 import numpy as np
 from dataclasses import dataclass
 from pyrr import Matrix44, Vector3, Vector4
@@ -6,14 +7,22 @@ import moderngl as mgl
 from pyrousel.shader import ShaderSource
 from pyrousel.model import RenderModel
 
+class WireframeMode(Enum):
+    WireframeOff = 0
+    WireframeOnly = 1
+    WireframeShaded = 2
+
+class VisualiserMode(Enum):
+    ShowDefault = 0
+    ShowNormals = 1
+    ShowTexcoords = 2
+    ShowColor = 3
+
 @dataclass
 class RenderHints:
-    draw_shaded = True
-    draw_wireframe = True
+    visualiser_mode = VisualiserMode.ShowDefault
+    wireframe_mode = WireframeMode.WireframeShaded
     wireframe_color = Vector4([0.0, 1.0, 0.0, 1.0])
-    visualise_normals: bool = False
-    visualise_texcoords: bool = False
-    visualise_colors: bool = False
 
 class GFX(object):
     def __init__(self, ctx: mgl.Context):
@@ -144,10 +153,10 @@ class GFX(object):
         if model is None:
             return
         
-        if hints.draw_shaded:
+        if hints.wireframe_mode is not WireframeMode.WireframeOnly :
             self.__DrawModel(model, hints)
 
-        if hints.draw_wireframe:
+        if hints.wireframe_mode is WireframeMode.WireframeOnly or hints.wireframe_mode is  WireframeMode.WireframeShaded:
             self.__DrawModelWire(model, hints.wireframe_color)
 
     def __DrawModel(self, model: RenderModel, hints: RenderHints) -> None:
@@ -192,9 +201,9 @@ class GFX(object):
         renderable.program['modelTransform'].write(transform.tobytes())
         renderable.program['viewTransform'].write(self.view_matrix.tobytes())
         renderable.program['perspectiveTransform'].write(self.perspective_matrix.tobytes())
-        renderable.program['visualise_normals'] = float(hints.visualise_normals)
-        renderable.program['visualise_texcoords'] = float(hints.visualise_texcoords)
-        renderable.program['visualise_colors'] = float(hints.visualise_colors)
+        renderable.program['visualise_normals'] = float(hints.visualiser_mode == VisualiserMode.ShowNormals)
+        renderable.program['visualise_texcoords'] = float(hints.visualiser_mode == VisualiserMode.ShowTexcoords)
+        renderable.program['visualise_colors'] = float(hints.visualiser_mode == VisualiserMode.ShowColor)
         
         
         self.GetContext().wireframe = False

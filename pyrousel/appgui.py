@@ -6,6 +6,8 @@ from imgui.integrations.glfw import GlfwRenderer as IMRenderer
 from glfw import _GLFWwindow
 from blinker import Signal
 
+from pyrousel.gfx import VisualiserMode, WireframeMode
+
 class AppGUI(object):
     def __init__(self, win_handle: _GLFWwindow):
         imgui.create_context()
@@ -58,7 +60,8 @@ class SceneStatsPanel(object):
 
     def Update(self) -> None:
         """Builds IMGui widgest that make this panel"""
-        if imgui.tree_node('Scene Stats'):
+        if imgui.collapsing_header("Scene Settings")[0]:
+            imgui.begin_child("#Scene Settings Panel", width=0, height=150, border=True)
             imgui.text('FPS: ')
             imgui.same_line(position=200)
             imgui.text(str(self.fps))
@@ -85,27 +88,34 @@ class SceneStatsPanel(object):
             imgui.text(str(Decimal(self.max_ext[1]).quantize(Decimal('1.00'), ROUND_DOWN)))
             imgui.same_line()
             imgui.text(str(Decimal(self.max_ext[2]).quantize(Decimal('1.00'), ROUND_DOWN)))
-            imgui.tree_pop()
-        imgui.separator()
+            imgui.end_child()
 
 class OverlaysPanel(object):
     def __init__(self):
-        self.wireframe_only = False
-        self.wireframe_shaded = False
+        self.visualiser_mode = VisualiserMode.ShowDefault
+        self.wireframe_mode = WireframeMode.WireframeOff
         self.wireframe_color = [1.0, 1.0, 1.0, 1.0]
-        self.visualise_normals = False
-        self.visualise_texcoords = False
-        self.visualise_colors = False
 
     def Update(self) -> None:
         """Builds IMGui widgest that make this panel"""
-        if imgui.tree_node('Overlays'):
-            imgui.text('Wireframe Shaded:')
+        if imgui.collapsing_header("Overlay Settings")[0]:
+            imgui.begin_child("#Overlay Settings Panel", width=0, height=240, border=True)
+            imgui.text('Wireframe:')
+            imgui.separator()
+            imgui.dummy(0, 5)
+            imgui.text('Wireframe Off:')
             imgui.same_line(position=200)
-            _, self.wireframe_shaded = imgui.checkbox('##Wireframe Shaded', self.wireframe_shaded)
+            if imgui.radio_button("##Wireframe Off", self.wireframe_mode == WireframeMode.WireframeOff):
+                self.wireframe_mode = WireframeMode.WireframeOff
             imgui.text('Wireframe Only:')
             imgui.same_line(position=200)
-            _, self.wireframe_only = imgui.checkbox('##Wireframe Only', self.wireframe_only)
+            if imgui.radio_button("##Wireframe Only", self.wireframe_mode == WireframeMode.WireframeOnly):
+                self.wireframe_mode = WireframeMode.WireframeOnly
+            imgui.text('Wireframe Shaded:')
+            imgui.same_line(position=200)
+            if imgui.radio_button("##Wireframe Shaded", self.wireframe_mode == WireframeMode.WireframeShaded):
+                self.wireframe_mode = WireframeMode.WireframeShaded
+            
             imgui.text('Wireframe Color:')
             imgui.same_line(position=200)
             _, self.wireframe_color = imgui.input_float4(
@@ -115,17 +125,27 @@ class OverlaysPanel(object):
                 self.wireframe_color[2],
                 self.wireframe_color[3]
             )
-            imgui.text('Visualise normals:')
+            imgui.dummy(0, 5)
+            imgui.text('Visualisers:')
+            imgui.separator()
+            imgui.dummy(0, 5)
+            imgui.text('Show Default:')
             imgui.same_line(position=200)
-            _, self.visualise_normals = imgui.checkbox('##Visualise Normals', self.visualise_normals)
-            imgui.text('Visualise Texcoords:')
+            if imgui.radio_button("##Show Default", self.visualiser_mode == VisualiserMode.ShowDefault):
+                self.visualiser_mode = VisualiserMode.ShowDefault
+            imgui.text('Show Normals:')
             imgui.same_line(position=200)
-            _, self.visualise_texcoords = imgui.checkbox('##Visualise Texcoords', self.visualise_texcoords)
-            imgui.text('Visualise Vertex Color:')
+            if imgui.radio_button("##Show Normals", self.visualiser_mode == VisualiserMode.ShowNormals):
+                self.visualiser_mode = VisualiserMode.ShowNormals
+            imgui.text('Show Texcoords:')
             imgui.same_line(position=200)
-            _, self.visualise_colors = imgui.checkbox('##Visualise Colors', self.visualise_colors)
-            imgui.tree_pop()
-        imgui.separator()
+            if imgui.radio_button("##Show Texcoords", self.visualiser_mode == VisualiserMode.ShowTexcoords):
+                self.visualiser_mode = VisualiserMode.ShowTexcoords
+            imgui.text('Show Color:')
+            imgui.same_line(position=200)
+            if imgui.radio_button("##Show Color", self.visualiser_mode == VisualiserMode.ShowColor):
+                self.visualiser_mode = VisualiserMode.ShowColor
+            imgui.end_child()
 
 class ImportSettingsPanel(object):
     def __init__(self):
@@ -134,15 +154,16 @@ class ImportSettingsPanel(object):
         self.ModelReloadSignal = Signal()
 
     def Update(self):
-        if imgui.tree_node('Import Settings'):
+        if imgui.collapsing_header("Import Settings")[0]:
+            max_width = imgui.get_content_region_available_width()
+            imgui.begin_child("#Import Settings Panel", width=0, height=75, border=True)
             imgui.text(str(os.path.basename(self.model_filepath)))
-            if imgui.button('Load Model'):
+            if imgui.button('Load Model', width=max_width):
                 self.model_filepath = easygui.fileopenbox()
                 self.ModelRequestSignal.send(self.model_filepath)
-            if imgui.button('Reload'):
+            if imgui.button('Reload', width=max_width):
                 self.ModelReloadSignal.send(None)
-            imgui.tree_pop()
-        imgui.separator()
+            imgui.end_child()
 
 class TransformsPanel(object):
     def __init__(self):
@@ -153,7 +174,8 @@ class TransformsPanel(object):
 
     def Update(self):
         """Builds IMGui widgest that make this panel"""
-        if imgui.tree_node('Transform'):
+        if imgui.collapsing_header("Transform")[0]:
+            imgui.begin_child("#Transform Settings Panel", width=0, height=320, border=True)
             imgui.text('Enable Carousel:')
             imgui.same_line(position=200)
             _, self.spin_model = imgui.checkbox('##Spin Model', self.spin_model)
@@ -193,8 +215,7 @@ class TransformsPanel(object):
             imgui.text('z:')
             imgui.same_line(position=50)
             _, self.scale[2] = imgui.input_float('##scale z', self.scale[2])
-            imgui.tree_pop()
-        imgui.separator()
+            imgui.end_child()
 
 class CameraSettingsPanel(object):
     def __init__(self):
@@ -205,7 +226,8 @@ class CameraSettingsPanel(object):
 
     def Update(self):
         """Builds IMGui widgest that make this panel"""
-        if imgui.tree_node('Camera Settings'):
+        if imgui.collapsing_header("Camera Settings")[0]:
+            imgui.begin_child("#Camera Settings Panel", width=0, height=120, border=True)
             imgui.text('FOV: ')
             imgui.same_line(position=150)
             _, self.fov = imgui.input_float('##fov', self.fov)
@@ -215,7 +237,6 @@ class CameraSettingsPanel(object):
             imgui.text('Far Plane: ')
             imgui.same_line(position=150)
             _, self.far_plane = imgui.input_float('##far plane', self.far_plane)
-            if imgui.button('Focus Camera'):
+            if imgui.button('Focus Camera', width=imgui.get_content_region_available_width()):
                 self.CameraFocusRequested.send(None)
-            imgui.tree_pop()
-        imgui.separator()
+            imgui.end_child()
