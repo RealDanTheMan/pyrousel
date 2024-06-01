@@ -33,6 +33,8 @@ class GFX(object):
         self.view_matrix: Matrix44 = Matrix44.identity().astype('float32')
         self.perspective_matrix: Matrix44  = Matrix44.identity().astype('float32')
 
+        self.light_value = Vector3([1,1,1])
+
         def_shader_src = ShaderSource.LoadFromFile(
             os.path.join(os.getcwd(), 'resources/shaders/default.vs'), 
             os.path.join(os.getcwd(), 'resources/shaders/default.fs')
@@ -204,6 +206,7 @@ class GFX(object):
         renderable.program['visualise_normals'] = float(hints.visualiser_mode == VisualiserMode.ShowNormals)
         renderable.program['visualise_texcoords'] = float(hints.visualiser_mode == VisualiserMode.ShowTexcoords)
         renderable.program['visualise_colors'] = float(hints.visualiser_mode == VisualiserMode.ShowColor)
+        renderable.program['light_color'] = self.light_value
         
         
         self.GetContext().wireframe = False

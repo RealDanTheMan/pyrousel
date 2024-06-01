@@ -16,6 +16,7 @@ class AppGUI(object):
         self.scene_stats = SceneStatsPanel()
         self.overlays = OverlaysPanel()
         self.camera_settings = CameraSettingsPanel()
+        self.light_settings = LightSettingsPanel()
         self.transforms = TransformsPanel()
 
     def __ProcessInputs(self) -> None:
@@ -32,6 +33,7 @@ class AppGUI(object):
         self.scene_stats.Update()
         self.overlays.Update()
         self.camera_settings.Update()
+        self.light_settings.Update()
         self.transforms.Update()
         imgui.end()
 
@@ -245,4 +247,21 @@ class CameraSettingsPanel(object):
             _, self.far_plane = imgui.input_float('##far plane', self.far_plane)
             if imgui.button('Focus Camera', width=imgui.get_content_region_available_width()):
                 self.CameraFocusRequested.send(None)
+            imgui.end_child()
+
+class LightSettingsPanel(object):
+    def __init__(self):
+        self.light_color = [1, 1, 1]
+        self.light_intensity = 1.0
+
+    def Update(self) -> None:
+        """Builds IMGui widgest that make this panel"""
+        if imgui.collapsing_header("Light Settings")[0]:
+            imgui.begin_child("##Light Settings Panel", width=0, height=120, border=True)
+            imgui.text('Color')
+            imgui.same_line(position=150)
+            _, self.light_color = imgui.color_edit3('##Light Color', *self.light_color)
+            imgui.text('Intensity')
+            imgui.same_line(position=150)
+            _, self.light_intensity = imgui.slider_float('##Light Intenisty', self.light_intensity, 0.0, 1.0)
             imgui.end_child()

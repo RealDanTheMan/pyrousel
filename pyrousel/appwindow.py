@@ -20,6 +20,8 @@ class AppWindow(object):
         self.enable_carousel = True
         self.frame_counter = FrameCounter()
         self.frame_counter.Start()
+        self.light_color = Vector3([1,1,1])
+        self.light_intensity = 1.0
         
         # Initialise GLFW window & OpenGL context
         if not glfw.init():
@@ -106,6 +108,9 @@ class AppWindow(object):
         self.gui.camera_settings.fov = self.camera.fov
         self.gui.camera_settings.near_plane = self.camera.near_clip
         self.gui.camera_settings.far_plane = self.camera.far_clip
+
+        self.gui.light_settings.light_color = list(self.light_color)
+        self.gui.light_settings.light_intensity = self.light_intensity
         
         self.gui.transforms.spin_model = self.enable_carousel
         translation = self.model.transform.GetTranslation()
@@ -130,6 +135,8 @@ class AppWindow(object):
         self.camera.fov = self.gui.camera_settings.fov
         self.camera.near_clip = self.gui.camera_settings.near_plane
         self.camera.far_clip = self.gui.camera_settings.far_plane
+        self.light_color = Vector3(self.gui.light_settings.light_color)
+        self.light_intensity = self.gui.light_settings.light_intensity
 
         self.enable_carousel = self.gui.transforms.spin_model
         if not self.model is None:
@@ -159,6 +166,7 @@ class AppWindow(object):
         self.graphics.ClearScreen(0.1, 0.1, 0.1)
         self.graphics.SetViewMatrix(self.camera.GetViewMatrix())
         self.graphics.SetPerspectiveMatrix(self.camera.GetPerspectiveMatrix())
+        self.graphics.light_value = self.light_color * self.light_intensity
         self.graphics.RenderModel(self.model, self.render_hints)
         self.gui.Render()
         glfw.swap_buffers(self.__win)

@@ -4,6 +4,7 @@ uniform mat4 modelTransform;
 uniform float visualise_normals;
 uniform float visualise_texcoords;
 uniform float visualise_colors;
+uniform vec3 light_color;
 
 in vec3 vertexNormal;
 in vec3 objectNormal;
@@ -19,7 +20,7 @@ void main()
 
     vec3 basecol = vec3(0.9, 0.5, 0.1);
     vec3 ambience = basecol * 0.05;
-    vec3 diff = clamp(ndotl * vec3(1,1,1), 0.0, 1.0);
+    vec3 diff = clamp(ndotl * light_color, 0.0, 1.0);
     vec3 debugNormals = (vertexNormal + vec3(1,1,1) * 0.5);
     vec3 debugTexcoords = vec3(texcoord.xy, 0.0);
     vec3 debugColors = color;
