@@ -64,30 +64,36 @@ class SceneStatsPanel(object):
             imgui.begin_child("#Scene Settings Panel", width=0, height=150, border=True)
             imgui.text('FPS: ')
             imgui.same_line(position=200)
-            imgui.text(str(self.fps))
+            imgui.input_int('##FPS', self.fps, flags=imgui.INPUT_TEXT_READ_ONLY)
             imgui.text('Frames: ')
             imgui.same_line(position=200)
-            imgui.text(str(self.frames))
+            imgui.input_int('##Frame', self.frames, flags=imgui.INPUT_TEXT_READ_ONLY)
             imgui.text('Vertices: ')
             imgui.same_line(position=200)
-            imgui.text(str(int(self.num_vertex)))
+            imgui.input_int('##Vertex Count', self.num_vertex, flags=imgui.INPUT_TEXT_READ_ONLY)
             imgui.text('Triangles: ')
             imgui.same_line(position=200)
-            imgui.text(str(int(self.num_triangles)))
+            imgui.input_int('##Triangle Count', self.num_triangles, flags=imgui.INPUT_TEXT_READ_ONLY)
             imgui.text('Min Extends: ')
             imgui.same_line(position=200)
-            imgui.text(str(Decimal(self.min_ext[0]).quantize(Decimal('1.00'), ROUND_DOWN)))
-            imgui.same_line()
-            imgui.text(str(Decimal(self.min_ext[1]).quantize(Decimal('1.00'), ROUND_DOWN)))
-            imgui.same_line()
-            imgui.text(str(Decimal(self.min_ext[2]).quantize(Decimal('1.00'), ROUND_DOWN)))
-            imgui.text('Mix Extends: ')
+            imgui.input_float3(
+                '##Min Extends',
+                self.min_ext[0],
+                self.min_ext[1],
+                self.min_ext[2],
+                flags=imgui.INPUT_TEXT_READ_ONLY
+            )
+
+            imgui.text('Max Extends: ')
             imgui.same_line(position=200)
-            imgui.text(str(Decimal(self.max_ext[0]).quantize(Decimal('1.00'), ROUND_DOWN)))
-            imgui.same_line()
-            imgui.text(str(Decimal(self.max_ext[1]).quantize(Decimal('1.00'), ROUND_DOWN)))
-            imgui.same_line()
-            imgui.text(str(Decimal(self.max_ext[2]).quantize(Decimal('1.00'), ROUND_DOWN)))
+            imgui.input_float3(
+                '##Max Extends',
+                self.max_ext[0],
+                self.max_ext[1],
+                self.max_ext[2],
+                flags=imgui.INPUT_TEXT_READ_ONLY
+            )
+            
             imgui.end_child()
 
 class OverlaysPanel(object):
