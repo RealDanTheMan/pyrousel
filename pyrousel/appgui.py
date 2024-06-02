@@ -263,5 +263,5 @@ class LightSettingsPanel(object):
             _, self.light_color = imgui.color_edit3('##Light Color', *self.light_color)
             imgui.text('Intensity')
             imgui.same_line(position=150)
-            _, self.light_intensity = imgui.slider_float('##Light Intenisty', self.light_intensity, 0.0, 1.0)
+            _, self.light_intensity = imgui.slider_float('##Light Intenisty', self.light_intensity, 0.0, 10.0)
             imgui.end_child()
