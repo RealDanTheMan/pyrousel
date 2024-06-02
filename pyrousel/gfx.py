@@ -34,7 +34,7 @@ class GFX(object):
         self.perspective_matrix: Matrix44  = Matrix44.identity().astype('float32')
 
         self.light_value = Vector3([1,1,1])
-
+        self.light_position = Vector3([1000, 1000, 1000])
         def_shader_src = ShaderSource.LoadFromFile(
             os.path.join(os.getcwd(), 'resources/shaders/default.vs'), 
             os.path.join(os.getcwd(), 'resources/shaders/default.fs')
@@ -200,13 +200,14 @@ class GFX(object):
             index_buffer=model.index_buffer
         )
         
-        renderable.program['modelTransform'].write(transform.tobytes())
-        renderable.program['viewTransform'].write(self.view_matrix.tobytes())
-        renderable.program['perspectiveTransform'].write(self.perspective_matrix.tobytes())
+        renderable.program['model_transform'].write(transform.tobytes())
+        renderable.program['view_transform'].write(self.view_matrix.tobytes())
+        renderable.program['perspective_transform'].write(self.perspective_matrix.tobytes())
         renderable.program['visualise_normals'] = float(hints.visualiser_mode == VisualiserMode.ShowNormals)
         renderable.program['visualise_texcoords'] = float(hints.visualiser_mode == VisualiserMode.ShowTexcoords)
         renderable.program['visualise_colors'] = float(hints.visualiser_mode == VisualiserMode.ShowColor)
         renderable.program['light_color'] = self.light_value
+        renderable.program['light_position'] = self.light_position
         
         
         self.GetContext().wireframe = False
@@ -242,9 +243,9 @@ class GFX(object):
             index_buffer=model.index_buffer
         )
 
-        renderable.program['modelTransform'].write(mat.tobytes())
-        renderable.program['viewTransform'].write(self.view_matrix.tobytes())
-        renderable.program['perspectiveTransform'].write(self.perspective_matrix.tobytes())
+        renderable.program['model_transform'].write(mat.tobytes())
+        renderable.program['view_transform'].write(self.view_matrix.tobytes())
+        renderable.program['perspective_transform'].write(self.perspective_matrix.tobytes())
         renderable.program['color'] = color
 
         self.GetContext().wireframe = True
