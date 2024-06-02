@@ -16,6 +16,7 @@ class AppGUI(object):
         self.scene_stats = SceneStatsPanel()
         self.overlays = OverlaysPanel()
         self.camera_settings = CameraSettingsPanel()
+        self.material_settings = MaterialSettingsPanel()
         self.light_settings = LightSettingsPanel()
         self.transforms = TransformsPanel()
 
@@ -32,6 +33,7 @@ class AppGUI(object):
         self.import_settings.Update()
         self.scene_stats.Update()
         self.overlays.Update()
+        self.material_settings.Update()
         self.camera_settings.Update()
         self.light_settings.Update()
         self.transforms.Update()
@@ -264,4 +266,25 @@ class LightSettingsPanel(object):
             imgui.text('Intensity')
             imgui.same_line(position=150)
             _, self.light_intensity = imgui.slider_float('##Light Intenisty', self.light_intensity, 0.0, 10.0)
+            imgui.end_child()
+
+class MaterialSettingsPanel(object):
+    def __init__(self):
+        self.color = [1.0, 1.0, 1.0]
+        self.rougness = 0.0
+        self.specular = 1.0
+
+    def Update(self):
+        """Builds IMGui widgest that make this panel"""
+        if imgui.collapsing_header("Material Settings")[0]:
+            imgui.begin_child("##Material Settings Panel", width=0, height=120, border=True)
+            imgui.text('Base Color')
+            imgui.same_line(position=150)
+            _, self.color = imgui.color_edit3('##Base Color', *self.color)
+            imgui.text('Rougness')
+            imgui.same_line(position=150)
+            _, self.rougness = imgui.slider_float('##Roughness', self.rougness, 0.0, 1.0)
+            imgui.text('Specular')
+            imgui.same_line(position=150)
+            _, self.specular = imgui.slider_float('##Specular', self.specular, 0.0, 1.0)
             imgui.end_child()
