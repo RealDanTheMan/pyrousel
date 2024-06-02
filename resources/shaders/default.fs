@@ -23,8 +23,8 @@ float LambertCoefficient(vec3 normal, vec3 light_dir)
 
 float PhongCoefficient(vec3 view_dir, vec3 light_dir, vec3 normal)
 {
-    vec3 half = normalize(view_dir + light_dir);
-    float angle = max(dot(half, normal), 0.0);
+    vec3 view_light = normalize(view_dir + light_dir);
+    float angle = max(dot(view_light, normal), 0.0);
     return pow(angle, 1.0);
 }
 
