@@ -18,6 +18,12 @@ class VisualiserMode(Enum):
     ShowTexcoords = 2
     ShowColor = 3
 
+class MaterialSettings(object):
+    def __init__(self):
+        self.base_color: Vector3 = Vector3([1.0, 1.0, 1.0])
+        self.roughness = 0.5
+        self.spec_intensity = 1.0
+
 @dataclass
 class RenderHints:
     visualiser_mode = VisualiserMode.ShowDefault
@@ -32,7 +38,6 @@ class GFX(object):
         self.__ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
         self.view_matrix: Matrix44 = Matrix44.identity().astype('float32')
         self.perspective_matrix: Matrix44  = Matrix44.identity().astype('float32')
-
         self.light_value = Vector3([1,1,1])
         self.light_position = Vector3([1000, 1000, 1000])
         def_shader_src = ShaderSource.LoadFromFile(
@@ -151,17 +156,17 @@ class GFX(object):
         if model.color_buffer is None:
             raise Exception('Invalid color  buffer handle!')
 
-    def RenderModel(self, model: RenderModel, hints: RenderHints) -> None:
+    def RenderModel(self, model: RenderModel, hints: RenderHints, material: MaterialSettings) -> None:
         if model is None:
             return
         
         if hints.wireframe_mode is not WireframeMode.WireframeOnly :
-            self.__DrawModel(model, hints)
+            self.__DrawModel(model, hints, material)
 
         if hints.wireframe_mode is WireframeMode.WireframeOnly or hints.wireframe_mode is  WireframeMode.WireframeShaded:
             self.__DrawModelWire(model, hints.wireframe_color)
 
-    def __DrawModel(self, model: RenderModel, hints: RenderHints) -> None:
+    def __DrawModel(self, model: RenderModel, hints: RenderHints, material: MaterialSettings) -> None:
         """
         Draws given model to the screen
 
@@ -208,7 +213,9 @@ class GFX(object):
         renderable.program['visualise_colors'] = float(hints.visualiser_mode == VisualiserMode.ShowColor)
         renderable.program['light_color'] = self.light_value
         renderable.program['light_position'] = self.light_position
-        
+        renderable.program['mat_base_color'] = material.base_color
+        renderable.program['mat_roughness'] = material.roughness
+        renderable.program['mat_spec_intensity'] = material.spec_intensity
         
         self.GetContext().wireframe = False
         self.GetContext().polygon_offset = (0,0)
@@ -251,4 +258,3 @@ class GFX(object):
         self.GetContext().wireframe = True
         self.GetContext().polygon_offset = (-10,-10)
         renderable.render()
-
