@@ -11,6 +11,9 @@ out vec4 f_color;
 uniform mat4 view_transform;
 uniform vec3 light_color;
 uniform vec3 light_position;
+uniform vec3 mat_base_color;
+uniform float mat_roughness;
+uniform float mat_spec_intensity;
 uniform float visualise_normals;
 uniform float visualise_texcoords;
 uniform float visualise_colors;
@@ -21,11 +24,22 @@ float LambertCoefficient(vec3 normal, vec3 light_dir)
     return pow(NdotL * 0.5 + 0.5, 2.0);
 }
 
-float PhongCoefficient(vec3 view_dir, vec3 light_dir, vec3 normal)
+float PhongCoefficient(
+    vec3 view_dir, 
+    vec3 light_dir, 
+    vec3 normal, 
+    float intensity, 
+    float roughness
+)
 {
-    vec3 half = normalize(view_dir + light_dir);
-    float angle = max(dot(half, normal), 0.0);
-    return pow(angle, 1.0);
+    vec3 view_light = normalize(view_dir + light_dir);
+    float angle = max(dot(view_light, normal), 0.0);
+    float min_exp = 1.0;
+    float max_exp = 200.0;
+    float exp = mix(min_exp, max_exp, (1.0 - roughness));
+    float spec = intensity * pow(angle, exp);
+    
+    return spec;
 }
 
 void main() 
@@ -38,12 +52,12 @@ void main()
     vec3 surface_normal = normalize(object_normal);
     vec3 view_dir = normalize(camera_position - vertex_position);
     vec3 light_dir = normalize(light_position - vertex_position);
-    vec3 base_color = vec3(0.9, 0.5, 0.1);
+    vec3 base_color = mat_base_color;
     vec3 ambient_color = base_color * 0.05;
 
     // Lighting components
     vec3 diffuse = LambertCoefficient(surface_normal, light_dir) * base_color * light_color;
-    vec3 spec = PhongCoefficient(view_dir, light_dir, surface_normal) * light_color;
+    vec3 spec = PhongCoefficient(view_dir, light_dir, surface_normal, mat_spec_intensity, mat_roughness) * light_color;
     vec3 final = diffuse + spec;
     
     // Debug visualisation

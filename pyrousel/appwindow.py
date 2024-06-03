@@ -6,7 +6,7 @@ import numpy as np
 import math
 from pyrr import vector3, Vector3, Vector4
 from pyrousel.appgui import AppGUI
-from pyrousel.gfx import GFX, RenderHints
+from pyrousel.gfx import GFX, RenderHints, MaterialSettings
 from pyrousel.model import RenderModel, PrimitiveFactory, ModelLoader
 from pyrousel.camera import Camera
 
@@ -17,6 +17,8 @@ class AppWindow(object):
         self.__aspec_ratio = self.__width / self.__height
         self.render_hints = RenderHints()
         self.render_hints.wireframe_color = Vector4([0.0, 0.55, 0.0, 0.22])
+        self.material_settings = MaterialSettings()
+        self.material_settings.base_color = Vector3([0.9, 0.5, 0.1])
         self.enable_carousel = True
         self.frame_counter = FrameCounter()
         self.frame_counter.Start()
@@ -104,6 +106,10 @@ class AppWindow(object):
         self.gui.overlays.wireframe_mode = self.render_hints.wireframe_mode
         self.gui.overlays.visualise_state = self.render_hints.visualiser_mode
         self.gui.overlays.wireframe_color = list(self.render_hints.wireframe_color)
+
+        self.gui.material_settings.color = list(self.material_settings.base_color)
+        self.gui.material_settings.rougness = self.material_settings.roughness
+        self.gui.material_settings.specular = self.material_settings.spec_intensity
         
         self.gui.camera_settings.fov = self.camera.fov
         self.gui.camera_settings.near_plane = self.camera.near_clip
@@ -131,6 +137,10 @@ class AppWindow(object):
         self.render_hints.visualiser_mode = self.gui.overlays.visualiser_mode
         self.render_hints.wireframe_mode = self.gui.overlays.wireframe_mode
         self.render_hints.wireframe_color = Vector4(self.gui.overlays.wireframe_color)
+
+        self.material_settings.base_color = Vector3(self.gui.material_settings.color)
+        self.material_settings.roughness = self.gui.material_settings.rougness
+        self.material_settings.spec_intensity = self.gui.material_settings.specular
 
         self.camera.fov = self.gui.camera_settings.fov
         self.camera.near_clip = self.gui.camera_settings.near_plane
@@ -167,7 +177,7 @@ class AppWindow(object):
         self.graphics.SetViewMatrix(self.camera.GetViewMatrix())
         self.graphics.SetPerspectiveMatrix(self.camera.GetPerspectiveMatrix())
         self.graphics.light_value = self.light_color * self.light_intensity
-        self.graphics.RenderModel(self.model, self.render_hints)
+        self.graphics.RenderModel(self.model, self.render_hints, self.material_settings)
         self.gui.Render()
         glfw.swap_buffers(self.__win)
 
