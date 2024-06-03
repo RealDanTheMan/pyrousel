@@ -1,5 +1,7 @@
 #version 330
 
+#define PI 3.1415926535897932384626433832795
+
 in vec3 vertex_position;
 in vec3 vertex_normal;
 in vec3 object_normal;
@@ -18,47 +20,63 @@ uniform float visualise_normals;
 uniform float visualise_texcoords;
 uniform float visualise_colors;
 
-float LambertCoefficient(vec3 normal, vec3 light_dir)
+float ComputeDiffuse(float NdotL)
 {
-    float NdotL = max(0.0, dot(normal, light_dir));
     return pow(NdotL * 0.5 + 0.5, 2.0);
 }
 
-float PhongCoefficient(
-    vec3 view_dir, 
-    vec3 light_dir, 
-    vec3 normal, 
-    float intensity, 
-    float roughness
+vec3 ComputeFresnel(float NdotH, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - NdotH, 5.0);
+}
+
+float ComputeGGX(float theta, float roughness)
+{
+    float r = pow(roughness, 4);
+    float thetasq = theta * theta;
+    float ggx = 1.0 / (theta + sqrt(r + thetasq - r * thetasq));
+    
+    return ggx;
+}
+
+float ComputeSpecularBRDF(
+    float NdotL,
+    float NdotV,
+    float NdotH,
+    float roughness,
+    float intensity,
+    vec3 F0
 )
 {
-    vec3 view_light = normalize(view_dir + light_dir);
-    float angle = max(dot(view_light, normal), 0.0);
-    float min_exp = 1.0;
-    float max_exp = 200.0;
-    float exp = mix(min_exp, max_exp, (1.0 - roughness));
-    float spec = intensity * pow(angle, exp);
+    vec3 fresnel = ComputeFresnel(NdotH, F0);
+    float ggx = ComputeGGX(NdotL, roughness) * ComputeGGX(NdotV, roughness);
+    float spec = (1.0 / PI) * fresnel.x * ggx * intensity;
     
     return spec;
 }
 
 void main() 
 {
-    // Temporary sunlight
-    vec3 sun = vec3(1, 0.0, 1);
-    
     // Lighting inputs
     vec3 camera_position = view_transform[3].xyz;
     vec3 surface_normal = normalize(object_normal);
-    vec3 view_dir = normalize(camera_position - vertex_position);
+    vec3 view_dir = normalize(vertex_position - camera_position);
     vec3 light_dir = normalize(light_position - vertex_position);
     vec3 base_color = mat_base_color;
-    vec3 ambient_color = base_color * 0.05;
+
+    // BRDF inputs
+    vec3 H = normalize(view_dir + light_dir); // Halfway vector between view and light
+    vec3 F0 = vec3(0.04);
+    float NdotH = max(0.001, dot(surface_normal, H));
+    float NdotV = max(0.001, dot(surface_normal, view_dir));
+    float NdotL = max(0.001, dot(surface_normal, light_dir));
+    float HdotL = max(0.001, dot(H, light_dir));
+    float metalness = 0.0;
 
     // Lighting components
-    vec3 diffuse = LambertCoefficient(surface_normal, light_dir) * base_color * light_color;
-    vec3 spec = PhongCoefficient(view_dir, light_dir, surface_normal, mat_spec_intensity, mat_roughness) * light_color;
-    vec3 final = diffuse + spec;
+    vec3 diffuse = ComputeDiffuse(NdotL) * base_color;
+    vec3 spec = ComputeSpecularBRDF(NdotL, NdotV, NdotH, mat_roughness, mat_spec_intensity, F0) * vec3(1);
+    vec3 final = (diffuse + spec) * light_color;
     
     // Debug visualisation
     vec3 debugNormals = (vertex_normal + vec3(1,1,1) * 0.5);
