@@ -23,6 +23,7 @@ class MaterialSettings(object):
         self.base_color: Vector3 = Vector3([1.0, 1.0, 1.0])
         self.roughness = 0.5
         self.spec_intensity = 1.0
+        self.F0 = 0.04
 
 @dataclass
 class RenderHints:
@@ -216,6 +217,7 @@ class GFX(object):
         renderable.program['mat_base_color'] = material.base_color
         renderable.program['mat_roughness'] = material.roughness
         renderable.program['mat_spec_intensity'] = material.spec_intensity
+        renderable.program['mat_f0'] = material.F0
         
         self.GetContext().wireframe = False
         self.GetContext().polygon_offset = (0,0)

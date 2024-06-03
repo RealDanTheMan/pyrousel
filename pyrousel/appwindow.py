@@ -112,6 +112,7 @@ class AppWindow(object):
         self.gui.material_settings.color = list(self.material_settings.base_color)
         self.gui.material_settings.rougness = self.material_settings.roughness
         self.gui.material_settings.specular = self.material_settings.spec_intensity
+        self.gui.material_settings.F0 = self.material_settings.F0
         
         self.gui.camera_settings.fov = self.camera.fov
         self.gui.camera_settings.near_plane = self.camera.near_clip
@@ -143,6 +144,7 @@ class AppWindow(object):
         self.material_settings.base_color = Vector3(self.gui.material_settings.color)
         self.material_settings.roughness = self.gui.material_settings.rougness
         self.material_settings.spec_intensity = self.gui.material_settings.specular
+        self.material_settings.F0 = self.gui.material_settings.F0
 
         self.camera.fov = self.gui.camera_settings.fov
         self.camera.near_clip = self.gui.camera_settings.near_plane

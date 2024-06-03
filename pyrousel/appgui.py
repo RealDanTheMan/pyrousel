@@ -273,6 +273,7 @@ class MaterialSettingsPanel(object):
         self.color = [1.0, 1.0, 1.0]
         self.rougness = 0.0
         self.specular = 1.0
+        self.F0 = 0.04
 
     def Update(self):
         """Builds IMGui widgest that make this panel"""
@@ -284,6 +285,9 @@ class MaterialSettingsPanel(object):
             imgui.text('Rougness')
             imgui.same_line(position=150)
             _, self.rougness = imgui.slider_float('##Roughness', self.rougness, 0.0, 1.0)
+            imgui.text('F0')
+            imgui.same_line(position=150)
+            _, self.F0 = imgui.slider_float('##F0', self.F0, 0.0, 1.0)
             imgui.text('Specular')
             imgui.same_line(position=150)
             _, self.specular = imgui.slider_float('##Specular', self.specular, 0.0, 1.0)
