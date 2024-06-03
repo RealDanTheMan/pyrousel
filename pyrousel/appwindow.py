@@ -18,7 +18,9 @@ class AppWindow(object):
         self.render_hints = RenderHints()
         self.render_hints.wireframe_color = Vector4([0.0, 0.55, 0.0, 0.22])
         self.material_settings = MaterialSettings()
-        self.material_settings.base_color = Vector3([0.9, 0.5, 0.1])
+        self.material_settings.base_color = Vector3([0.615, 0.28, 0.18])
+        self.material_settings.roughness = 0.5
+        self.material_settings.spec_intensity = 0.7
         self.enable_carousel = True
         self.frame_counter = FrameCounter()
         self.frame_counter.Start()
