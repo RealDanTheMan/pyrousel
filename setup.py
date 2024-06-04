@@ -8,7 +8,14 @@ setup(
     author='Dan Wulczynski',
     url='https://github.com/RealDanTheMan/pyrousel',
     packages=find_packages(),
-    package_data={'pyrousel': ['resources/*']},
+    include_package_data=True,
+    package_data={'pyrousel': [
+        'resources/shaders/*.vs',
+        'resources/shaders/*.fs',
+        'resources/models/obj/*.obj',
+        'resources/models/gltf/*.glb',
+        'resources/models/collada/*.dae'
+    ]},
     install_requires=[
         "pyopengl",
         "glcontext",
