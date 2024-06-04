@@ -17,7 +17,7 @@ setup(
         "imgui",
         "easygui",
         "blinker"
-        #"trimesh"
+        "trimesh"
     ],
     entry_points={
         'console_scripts': [

@@ -2,7 +2,9 @@ import numpy as np
 from pyrr import Matrix44, Vector3
 
 from .transform import Transform
-from .trimesh import trimesh as trimesh
+
+#from .trimesh import trimesh as trimesh
+import trimesh
 
 class Model(object):
     def __init__(self):
