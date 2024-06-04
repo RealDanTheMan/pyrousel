@@ -14,7 +14,6 @@ Personal project still in progress, an excuse to try modern OpenGL & GLFW with P
   <img src="images/king/image01.png" alt="Example Image" width="220" height="220">
   <img src="images/king/image02.png" alt="Example Image" width="220" height="220">
   <img src="images/king/image03.png" alt="Example Image" width="220" height="220">
-  <img src="images/king/image04.png" alt="Example Image" width="220" height="220">
   <img src="images/king/image05.png" alt="Example Image" width="220" height="220">
 </div>
 <br>
@@ -26,5 +25,6 @@ Personal project still in progress, an excuse to try modern OpenGL & GLFW with P
 </div>
 <br>
 <div style="display: flex; justify-content: space-between;">
+  <p>Full Property Panel</p>
   <img src="images/PropertyPanel.png" alt="Example Image">
 </div>
