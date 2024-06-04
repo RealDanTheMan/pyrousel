@@ -18,9 +18,9 @@ Installation (Windows PowerShell)
 ----------------------
 ``` PowerShell
 # Dowload package & install
-Invoke-WebRequest -Uri "https://github.com/RealDanTheMan/pyrousel.zip" -OutFile "pyrousel.zip"
+Invoke-WebRequest -Uri "https://github.com/RealDanTheMan/pyrousel/archive/refs/heads/dev.zip" -OutFile "pyrousel.zip"
 Expand-Archive -Path "pyrousel.zip" -DestinationPath ".\\pyrousel\\"
-cd .\\pyrousel
+cd .\\pyrousel\\pyrousel-dev\\
 py -m pip install .
 
 # Run Pyrousel
