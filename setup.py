@@ -17,7 +17,7 @@ setup(
         "glfw",
         "imgui",
         "easygui",
-        "blinker"
+        "blinker",
         "trimesh"
     ],
     entry_points={
