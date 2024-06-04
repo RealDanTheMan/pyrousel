@@ -10,6 +10,7 @@ setup(
     packages=find_packages(),
     package_data={'pyrousel': ['resources/*']},
     install_requires=[
+        "pyopengl",
         "glcontext",
         "moderngl",
         "moderngl-window",
