@@ -1,5 +1,6 @@
 import os
 import time
+import importlib.resources
 import glfw
 import moderngl as mgl
 import numpy as np
@@ -48,12 +49,14 @@ class AppWindow(object):
     def Init(self) -> None:
         """Initialises OpenGL graphics renderer"""
         self.graphics = GFX(mgl.create_context())
-
-        self.__LoadModel(os.path.join(os.getcwd(), 'resources/models/obj/monkey.obj'))
         self.camera = Camera()
         self.camera.aspect = self.__aspec_ratio
         self.camera.fov = 30.0
-        self.camera.transform.Translate(0.0, 0.0, 5.0)
+        self.camera.transform.Translate(0.0, 0.0, 5.0)  
+
+        with importlib.resources.path('pyrousel.resources.models.obj', 'monkey.obj') as startup_model:
+            self.__LoadModel(startup_model)
+        
         self.__FrameModel()
         self.__UpdateUI()
 

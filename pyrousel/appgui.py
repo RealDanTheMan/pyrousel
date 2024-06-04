@@ -1,4 +1,5 @@
 import os
+import importlib.resources
 import easygui
 import imgui
 from decimal import Decimal, ROUND_DOWN
@@ -169,7 +170,10 @@ class ImportSettingsPanel(object):
             imgui.begin_child("#Import Settings Panel", width=0, height=75, border=True)
             imgui.text(str(os.path.basename(self.model_filepath)))
             if imgui.button('Load Model', width=max_width):
-                self.model_filepath = easygui.fileopenbox()
+                dir = importlib.resources.files('pyrousel.resources.models.obj').joinpath('monkey.obj')
+                print('default file')
+                print(dir)
+                self.model_filepath = easygui.fileopenbox(default=dir)
                 self.ModelRequestSignal.send(self.model_filepath)
             if imgui.button('Reload', width=max_width):
                 self.ModelReloadSignal.send(None)

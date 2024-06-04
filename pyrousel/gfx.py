@@ -1,4 +1,5 @@
 import os
+import importlib.resources
 from enum import Enum
 import numpy as np
 from dataclasses import dataclass
@@ -42,14 +43,15 @@ class GFX(object):
         self.perspective_matrix: Matrix44  = Matrix44.identity().astype('float32')
         self.light_value = Vector3([1,1,1])
         self.light_position = Vector3([1000, 1000, 1000])
+
         def_shader_src = ShaderSource.LoadFromFile(
-            os.path.join(os.getcwd(), 'resources/shaders/default.vs'), 
-            os.path.join(os.getcwd(), 'resources/shaders/default.fs')
+            importlib.resources.files('pyrousel.resources.shaders').joinpath('default.vs'), 
+            importlib.resources.files('pyrousel.resources.shaders').joinpath('default.fs')
         )
 
         def_wireshader_src = ShaderSource.LoadFromFile(
-            os.path.join(os.getcwd(), 'resources/shaders/wireframe.vs'), 
-            os.path.join(os.getcwd(), 'resources/shaders/wireframe.fs')
+            importlib.resources.files('pyrousel.resources.shaders').joinpath('wireframe.vs'), 
+            importlib.resources.files('pyrousel.resources.shaders').joinpath('wireframe.fs')
         )
 
         self.def_shader = self.CompileShaderProgram(def_shader_src)
