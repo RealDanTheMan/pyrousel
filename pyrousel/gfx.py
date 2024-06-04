@@ -4,8 +4,9 @@ import numpy as np
 from dataclasses import dataclass
 from pyrr import Matrix44, Vector3, Vector4
 import moderngl as mgl
-from pyrousel.shader import ShaderSource
-from pyrousel.model import RenderModel
+
+from .shader import ShaderSource
+from .model import RenderModel
 
 class WireframeMode(Enum):
     WireframeOff = 0

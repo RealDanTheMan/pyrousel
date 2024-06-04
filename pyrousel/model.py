@@ -1,7 +1,8 @@
 import numpy as np
 from pyrr import Matrix44, Vector3
-from pyrousel.transform import Transform
-from pyrousel.trimesh import trimesh as trimesh
+
+from .transform import Transform
+from .trimesh import trimesh as trimesh
 
 class Model(object):
     def __init__(self):

@@ -1,2 +1,2 @@
-from pyrousel.app import Run
+from .app import Run
 Run()

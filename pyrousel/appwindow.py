@@ -5,10 +5,11 @@ import moderngl as mgl
 import numpy as np
 import math
 from pyrr import vector3, Vector3, Vector4
-from pyrousel.appgui import AppGUI
-from pyrousel.gfx import GFX, RenderHints, MaterialSettings
-from pyrousel.model import RenderModel, PrimitiveFactory, ModelLoader
-from pyrousel.camera import Camera
+
+from .appgui import AppGUI
+from .gfx import GFX, RenderHints, MaterialSettings
+from .model import RenderModel, PrimitiveFactory, ModelLoader
+from .camera import Camera
 
 class AppWindow(object):
     def __init__(self, width: int = 1280, height: int = 720):

@@ -6,7 +6,7 @@ from imgui.integrations.glfw import GlfwRenderer as IMRenderer
 from glfw import _GLFWwindow
 from blinker import Signal
 
-from pyrousel.gfx import VisualiserMode, WireframeMode
+from .gfx import VisualiserMode, WireframeMode
 
 class AppGUI(object):
     def __init__(self, win_handle: _GLFWwindow):
