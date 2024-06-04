@@ -17,6 +17,7 @@ setup(
         'resources/models/collada/*.dae'
     ]},
     install_requires=[
+        "scipy",
         "pyopengl",
         "glcontext",
         "moderngl",
