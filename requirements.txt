@@ -1,0 +1,9 @@
+blinker==1.8.2
+easygui==0.98.3
+glfw==2.7.0
+imgui==2.0.0
+moderngl==5.10.0
+numpy==1.26.4
+pyrr==0.10.3
+setuptools==69.0.3
+trimesh==4.4.0
