@@ -6,4 +6,7 @@ moderngl==5.10.0
 numpy==1.26.4
 pyrr==0.10.3
 setuptools==69.0.3
+
 trimesh==4.4.0
+scipy==1.13.1
+pycollada==0.8
