@@ -1,4 +1,4 @@
-Pyrousel - Python based 3D model visualiser
+Pyrousel - Python based 3D model visualiser [![Python package](https://github.com/RealDanTheMan/pyrousel/actions/workflows/python-package.yml/badge.svg)](https://github.com/RealDanTheMan/pyrousel/actions/workflows/python-package.yml)
 --------------------------------
 Personal project still in progress, an excuse to try modern OpenGL & GLFW with Python
 
