@@ -18,14 +18,17 @@ setup(
     ]},
     install_requires=[
         "scipy",
+        'pyrr',
         "pyopengl",
         "glcontext",
         "moderngl",
         "moderngl-window",
         "glfw",
         "imgui",
+        'tk',
         "easygui",
         "blinker",
+        'pycollada',
         "trimesh"
     ],
     entry_points={
