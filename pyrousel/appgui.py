@@ -2,7 +2,6 @@ import os
 import importlib.resources
 import easygui
 import imgui
-from decimal import Decimal, ROUND_DOWN
 from imgui.integrations.glfw import GlfwRenderer as IMRenderer
 from glfw import _GLFWwindow
 from blinker import Signal

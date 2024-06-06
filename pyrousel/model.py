@@ -1,5 +1,5 @@
 import numpy as np
-from pyrr import Matrix44, Vector3
+from pyrr import Vector3
 
 from .transform import Transform
 
@@ -8,11 +8,11 @@ import trimesh
 
 class Model(object):
     def __init__(self):
-        self.vertices: List(np.array) = np.array([], dtype='f4')
-        self.normals: List(np.array) = np.array([], dtype='f4')
-        self.indices: List(np.array) = np.array([], dtype='i4')
-        self.texcoords: List(np.array) = np.array([], dtype='f4')
-        self.colors: List(np.array) = np.array([], dtype='f4')
+        self.vertices: list(np.array) = np.array([], dtype='f4')
+        self.normals: list(np.array) = np.array([], dtype='f4')
+        self.indices: list(np.array) = np.array([], dtype='i4')
+        self.texcoords: list(np.array) = np.array([], dtype='f4')
+        self.colors: list(np.array) = np.array([], dtype='f4')
         self.transform: Transform = Transform()
         self.minext: Vector3 = Vector3([0.0, 0.0, 0.0])
         self.maxext: Vector3 = Vector3([0.0, 0.0, 0.0])

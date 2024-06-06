@@ -1,4 +1,3 @@
-import math
 import numpy as np
 from pyrr import Matrix44, Matrix33, Vector3
 

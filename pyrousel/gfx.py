@@ -1,4 +1,3 @@
-import os
 import importlib.resources
 from enum import Enum
 import numpy as np
@@ -200,7 +199,7 @@ class GFX(object):
         ]
 
         shader_program = self.def_shader
-        if model.shader != None:
+        if model.shader is not None:
             shader_program = model.shader
 
         renderable = self.GetContext().vertex_array(

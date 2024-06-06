@@ -1,4 +1,3 @@
-import os
 import time
 import importlib.resources
 import glfw
@@ -9,7 +8,7 @@ from pyrr import vector3, Vector3, Vector4
 
 from .appgui import AppGUI
 from .gfx import GFX, RenderHints, MaterialSettings
-from .model import RenderModel, PrimitiveFactory, ModelLoader
+from .model import ModelLoader
 from .camera import Camera
 
 class AppWindow(object):
@@ -62,7 +61,7 @@ class AppWindow(object):
 
     def OnModelRequested(self, earg: str) -> None:
         """Event handler for loading new model into the scene"""
-        if not earg is None and earg is not self.model_filepath:
+        if earg is not None and earg is not self.model_filepath:
             print(f'Loading model: {earg}')
             self.model_filepath = earg
             self.__LoadModel(earg)
@@ -70,14 +69,14 @@ class AppWindow(object):
 
     def OnModelReloadRequested(self, earg) -> None:
         """Event handler for reloading active model in the current scene"""
-        if not self.model_filepath is None:
-            print(f'Reloading active model')
+        if self.model_filepath is not None:
+            print('Reloading active model')
             self.__LoadModel(self.model_filepath)
             self.__FrameModel()
 
     def OnCameraFocusRequested(self, earg) -> None:
         """Event handler for camera model focus"""
-        print(f'Requesting model camera focus')
+        print('Requesting model camera focus')
         self.__FrameModel()
 
     def __LoadModel(self, filepath: str) -> None:
@@ -89,7 +88,7 @@ class AppWindow(object):
 
     def __FrameModel(self) -> None:
         """Aligns the camera so that the loaded model is in a full view"""
-        if not self.model is None:
+        if self.model is not None:
             minext = self.model.transform.GetMatrix() * self.model.minext
             maxext = self.model.transform.GetMatrix() * self.model.maxext
             center = (minext + maxext) * 0.5
@@ -157,7 +156,7 @@ class AppWindow(object):
         self.light_intensity = self.gui.light_settings.light_intensity
 
         self.enable_carousel = self.gui.transforms.spin_model
-        if not self.model is None:
+        if self.model is not None:
             tr_x = self.gui.transforms.translation[0]
             tr_y = self.gui.transforms.translation[1]
             tr_z = self.gui.transforms.translation[2]
@@ -210,7 +209,7 @@ class FrameCounter(object):
         self.__frames: int = 0
         self.__fps: int = 0
         self.__max_samples: int = max_samples
-        self.__samples: List(float) = [0] * self.__max_samples
+        self.__samples: list(float) = [0] * self.__max_samples
         self.__sample_idx: int = 0
 
     def Start(self) -> None:
