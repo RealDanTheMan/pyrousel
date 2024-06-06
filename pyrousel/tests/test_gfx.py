@@ -34,7 +34,7 @@ class GFXTest(unittest.TestCase):
         vertex = importlib.resources.files('pyrousel.resources.shaders').joinpath('default.vs')
         fragment = importlib.resources.files('pyrousel.resources.shaders').joinpath('default.fs')
         assert os.path.isfile(vertex), f'Vertex shader file not on disk -> {vertex}'
-        assert os.path.isfile(vertex), f'Fragment shader file not on disk -> {fragment}'
+        assert os.path.isfile(fragment), f'Fragment shader file not on disk -> {fragment}'
 
         # Load shader source files
         shader_src = ShaderSource.LoadFromFile(vertex, fragment)
