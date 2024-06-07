@@ -1,15 +1,30 @@
 import numpy as np
-from pyrr import Matrix44, Vector3
-from pyrousel.transform import Transform
+from pyrr import Vector3
+
+from .transform import Transform
+
+#from .trimesh import trimesh as trimesh
+import trimesh
 
 class Model(object):
     def __init__(self):
-        self.vertices: List(np.array) = np.array([], dtype='f4')
-        self.normals: List(np.array) = np.array([], dtype='f4')
-        self.indices: List(np.array) = np.array([], dtype='i4')
+        self.vertices: list(np.array) = np.array([], dtype='f4')
+        self.normals: list(np.array) = np.array([], dtype='f4')
+        self.indices: list(np.array) = np.array([], dtype='i4')
+        self.texcoords: list(np.array) = np.array([], dtype='f4')
+        self.colors: list(np.array) = np.array([], dtype='f4')
         self.transform: Transform = Transform()
         self.minext: Vector3 = Vector3([0.0, 0.0, 0.0])
         self.maxext: Vector3 = Vector3([0.0, 0.0, 0.0])
+
+    def __repr__(self):
+        num_vertices = int(len(self.vertices) / 3)
+        num_indices = int(len(self.indices) / 3)
+        num_normals = int(len(self.normals) / 3)
+        num_texcoords = int(len(self.texcoords) / 3)
+        num_colors = int(len(self.colors) / 3)
+
+        return f'Model -> vertices:{num_vertices} normals:{num_normals} texcoords:{num_texcoords} colors:{num_colors} indices:{num_indices}'
 
     def RecomputeBounds(self):
         """Recalucaltes local extends/bounds based on the vertex data"""
@@ -27,6 +42,8 @@ class RenderModel(Model):
         self.shader = None
         self.vertex_buffer = None
         self.normal_buffer = None
+        self.texcoord_buffer = None
+        self.color_buffer = None
         self.index_buffer = None
         self.vertex_array = None
 
@@ -159,6 +176,7 @@ class ModelLoader():
         """
         vertices = []
         normals = []
+        texcoords = []
         indices = []
         with open(filepath, 'r') as file:
             for line in file:
@@ -176,6 +194,12 @@ class ModelLoader():
                     normals.append(data[0])
                     normals.append(data[1])
                     normals.append(data[2])
+                elif line.startswith('vt '):
+                    data = list(map(float, line.strip().split()[1:]))
+                    if(len(data) < 2):
+                        raise Exception("Texcoord format is invalid!")
+                    texcoords.append(data[0])
+                    texcoords.append(data[1])
                 elif line.startswith('f '):
                     facedata = line.strip().split()[1:]
                     if(len(facedata) != 3):
@@ -186,5 +210,60 @@ class ModelLoader():
         model = RenderModel()
         model.vertices = np.array(vertices, dtype='f4')
         model.normals = np.array(normals, dtype='f4')
+        model.texcoords = np.array(texcoords, dtype='f4')
+        model.indices = np.array(indices, dtype='i4')
+        return model
+    
+    @staticmethod
+    def LoadModel(filepath: str) -> RenderModel:
+        """
+        Loads model from wide variety of formats via Trimesh library
+
+        See https://trimesh.org/ for list of supported formats
+
+        Parameters
+        ----------
+        filepath : str
+            Filepath to the OBJ file containing the model data
+
+        Returns
+        -------
+        RenderModel object representing OBJ model
+        """
+        vertices = []
+        normals = []
+        texcoords = []
+        colors = []
+        indices = []
+
+        mesh = trimesh.load(filepath, force='mesh', process=False)
+        vertices = mesh.vertices.flatten()
+        indices = mesh.faces.flatten()
+        normals = mesh.vertex_normals.flatten()
+
+        # Note: Vertex color support in Trimesh is limited when meshes contain texture coords or materials
+        # Will have to make modification to enable better support
+
+        if hasattr(mesh.visual, 'uv') and mesh.visual.uv is not None:
+            texcoords = mesh.visual.uv.flatten()
+
+        if hasattr(mesh.visual, 'vertex_colors') and mesh.visual.vertex_colors is not None:
+            print('Fetching pure vertex color')
+            for color in mesh.visual.vertex_colors:
+                colors.append(color[0] / 255)
+                colors.append(color[1] / 255)
+                colors.append(color[2] / 255)
+        elif hasattr(mesh.visual, 'vertex_attributes') and 'color' in mesh.visual.vertex_attributes:
+            print('Fetching vertex color via vertex attributes')
+            for color in mesh.visual.vertex_attributes["color"]:
+                colors.append(color[0] / 255)
+                colors.append(color[1] / 255)
+                colors.append(color[2] / 255)
+
+        model = RenderModel()
+        model.vertices = np.array(vertices, dtype='f4')
+        model.normals = np.array(normals, dtype='f4')
+        model.texcoords = np.array(texcoords, dtype='f4')
+        model.colors = np.array(colors, dtype='f4')
         model.indices = np.array(indices, dtype='i4')
         return model

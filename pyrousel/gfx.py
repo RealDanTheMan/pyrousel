@@ -1,18 +1,60 @@
+import importlib.resources
+from enum import Enum
 import numpy as np
-from pyrr import Matrix44, Vector3
+from dataclasses import dataclass
+from pyrr import Matrix44, Vector3, Vector4
 import moderngl as mgl
-from pyrousel.shader import ShaderBase, ShaderFallback, ShaderWireframeFallback
-from pyrousel.model import RenderModel
+
+from .shader import ShaderSource
+from .model import RenderModel
+
+class WireframeMode(Enum):
+    WireframeOff = 0
+    WireframeOnly = 1
+    WireframeShaded = 2
+
+class VisualiserMode(Enum):
+    ShowDefault = 0
+    ShowNormals = 1
+    ShowTexcoords = 2
+    ShowColor = 3
+
+class MaterialSettings(object):
+    def __init__(self):
+        self.base_color: Vector3 = Vector3([1.0, 1.0, 1.0])
+        self.roughness = 0.5
+        self.spec_intensity = 1.0
+        self.F0 = 0.04
+
+@dataclass
+class RenderHints:
+    visualiser_mode = VisualiserMode.ShowDefault
+    wireframe_mode = WireframeMode.WireframeShaded
+    wireframe_color = Vector4([0.0, 1.0, 0.0, 1.0])
 
 class GFX(object):
     def __init__(self, ctx: mgl.Context):
         self.__ctx = ctx
         self.__ctx.enable(mgl.DEPTH_TEST)
+        self.__ctx.enable(mgl.BLEND)
+        self.__ctx.blend_func = (mgl.SRC_ALPHA, mgl.ONE_MINUS_SRC_ALPHA)
         self.view_matrix: Matrix44 = Matrix44.identity().astype('float32')
         self.perspective_matrix: Matrix44  = Matrix44.identity().astype('float32')
+        self.light_value = Vector3([1,1,1])
+        self.light_position = Vector3([1000, 1000, 1000])
 
-        self.def_shader = self.CompileShaderProgram(ShaderFallback())
-        self.def_wire_shader = self.CompileShaderProgram(ShaderWireframeFallback())
+        def_shader_src = ShaderSource.LoadFromFile(
+            importlib.resources.files('pyrousel.resources.shaders').joinpath('default.vs'), 
+            importlib.resources.files('pyrousel.resources.shaders').joinpath('default.fs')
+        )
+
+        def_wireshader_src = ShaderSource.LoadFromFile(
+            importlib.resources.files('pyrousel.resources.shaders').joinpath('wireframe.vs'), 
+            importlib.resources.files('pyrousel.resources.shaders').joinpath('wireframe.fs')
+        )
+
+        self.def_shader = self.CompileShaderProgram(def_shader_src)
+        self.def_wire_shader = self.CompileShaderProgram(def_wireshader_src)
 
     def GetContext(self) -> mgl.Context:
         """
@@ -32,7 +74,7 @@ class GFX(object):
         """
         self.perspective_matrix = perspmat.astype('float32')
 
-    def CompileShaderProgram(self, shader: ShaderBase) -> mgl.Program:
+    def CompileShaderProgram(self, shader: ShaderSource) -> mgl.Program:
         """
         Compiles given shader source and returns GLSL program handle
 
@@ -75,11 +117,59 @@ class GFX(object):
         model : RenderModel
             Model to generate buffers for
         """
+
+        # Geometry vertices & triangle indices are required
         model.vertex_buffer = self.GetContext().buffer(model.vertices)
-        model.normal_buffer = self.GetContext().buffer(model.normals)
         model.index_buffer = self.GetContext().buffer(model.indices)
 
-    def DrawModel(self, model: RenderModel):
+        # Geometry data such as normals, texture coordinates, etc. are optional
+        # When such data is not available we generated placeholder data to make
+        # sure our model remains compatible with our shading pipepline.
+        if len(model.normals) > 0:
+            model.normal_buffer = self.GetContext().buffer(model.normals)
+        else:
+            size = len(model.vertices)
+            dummy_normals = np.array([1.0] * size, dtype='f4')
+            model.normal_buffer = self.GetContext().buffer(dummy_normals)
+
+        if len(model.texcoords) > 0:
+            model.texcoord_buffer = self.GetContext().buffer(model.texcoords)
+        else:
+            size = int((len(model.vertices) / 3) * 2)
+            dummy_texcoords = np.array([0.0] * size, dtype='f4')
+            model.texcoord_buffer = self.GetContext().buffer(dummy_texcoords)
+        
+        if len(model.colors) > 0:
+            model.color_buffer = self.GetContext().buffer(model.colors)
+        else:
+            size = len(model.vertices)
+            dummy_colors = np.array([1.0] * size, dtype='f4')
+            model.color_buffer = self.GetContext().buffer(dummy_colors)
+        self.__ValidateModelBuffers(model)
+
+    def __ValidateModelBuffers(self, model: RenderModel) -> None:
+        if model.vertex_buffer is None:
+            raise Exception('Invalid vertex buffer handle!')
+        if model.index_buffer is None:
+            raise Exception('Invalid index buffer handle!')
+        if model.normal_buffer is None:
+            raise Exception('Invalid normal buffer handle!')
+        if model.texcoord_buffer is None:
+            raise Exception('Invalid texcoord  buffer handle!')
+        if model.color_buffer is None:
+            raise Exception('Invalid color  buffer handle!')
+
+    def RenderModel(self, model: RenderModel, hints: RenderHints, material: MaterialSettings) -> None:
+        if model is None:
+            return
+        
+        if hints.wireframe_mode is not WireframeMode.WireframeOnly :
+            self.__DrawModel(model, hints, material)
+
+        if hints.wireframe_mode is WireframeMode.WireframeOnly or hints.wireframe_mode is  WireframeMode.WireframeShaded:
+            self.__DrawModelWire(model, hints.wireframe_color)
+
+    def __DrawModel(self, model: RenderModel, hints: RenderHints, material: MaterialSettings) -> None:
         """
         Draws given model to the screen
 
@@ -95,17 +185,21 @@ class GFX(object):
         ----------
         model : RenderModel
             Model to draw to screen
+        hints: RenderHints
+            Flags defining rendering behaviour
         """
         transform = model.transform.GetMatrix()
 
         # Vertex attribute layout (pos, normal)
         attribs = [
             (model.vertex_buffer, '3f', 'in_position'),
-            (model.normal_buffer, '3f', 'in_normal')
+            (model.normal_buffer, '3f', 'in_normal'),
+            (model.texcoord_buffer, '2f', 'in_texcoord'),
+            (model.color_buffer, '3f', 'in_color')
         ]
 
         shader_program = self.def_shader
-        if model.shader != None:
+        if model.shader is not None:
             shader_program = model.shader
 
         renderable = self.GetContext().vertex_array(
@@ -114,14 +208,24 @@ class GFX(object):
             index_buffer=model.index_buffer
         )
         
-        renderable.program['modelTransform'].write(transform.tobytes())
-        renderable.program['viewTransform'].write(self.view_matrix.tobytes())
-        renderable.program['perspectiveTransform'].write(self.perspective_matrix.tobytes())
+        renderable.program['model_transform'].write(transform.tobytes())
+        renderable.program['view_transform'].write(self.view_matrix.tobytes())
+        renderable.program['perspective_transform'].write(self.perspective_matrix.tobytes())
+        renderable.program['visualise_normals'] = float(hints.visualiser_mode == VisualiserMode.ShowNormals)
+        renderable.program['visualise_texcoords'] = float(hints.visualiser_mode == VisualiserMode.ShowTexcoords)
+        renderable.program['visualise_colors'] = float(hints.visualiser_mode == VisualiserMode.ShowColor)
+        renderable.program['light_color'] = self.light_value
+        renderable.program['light_position'] = self.light_position
+        renderable.program['mat_base_color'] = material.base_color
+        renderable.program['mat_roughness'] = material.roughness
+        renderable.program['mat_spec_intensity'] = material.spec_intensity
+        renderable.program['mat_f0'] = material.F0
+        
         self.GetContext().wireframe = False
         self.GetContext().polygon_offset = (0,0)
         renderable.render()
 
-    def DrawModelWire(self, model: RenderModel):
+    def __DrawModelWire(self, model: RenderModel, color: Vector4) -> None:
         """
         Draws given model wireframe to the screen
 
@@ -134,6 +238,8 @@ class GFX(object):
         ----------
         model : RenderModel
             Model to draw wireframe from to screen
+        coloe : Vector3
+            Color (RGBA) of the wireframe lines
         """
         mat = model.transform.GetMatrix()
 
@@ -148,12 +254,11 @@ class GFX(object):
             index_buffer=model.index_buffer
         )
 
-        renderable.program['modelTransform'].write(mat.tobytes())
-        renderable.program['viewTransform'].write(self.view_matrix.tobytes())
-        renderable.program['perspectiveTransform'].write(self.perspective_matrix.tobytes())
-        renderable.program['color'] = (1.0, 0.0, 0.0)
+        renderable.program['model_transform'].write(mat.tobytes())
+        renderable.program['view_transform'].write(self.view_matrix.tobytes())
+        renderable.program['perspective_transform'].write(self.perspective_matrix.tobytes())
+        renderable.program['color'] = color
 
         self.GetContext().wireframe = True
         self.GetContext().polygon_offset = (-10,-10)
         renderable.render()
-

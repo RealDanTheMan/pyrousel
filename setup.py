@@ -3,16 +3,33 @@ from setuptools import setup, find_packages
 
 setup(
     name='Pyrousel',
-    version='0.0.2',
+    version='0.1.0',
+    description='Simple OpenGL based model viewer',
+    author='Dan Wulczynski',
+    url='https://github.com/RealDanTheMan/pyrousel',
     packages=find_packages(),
+    include_package_data=True,
+    package_data={'pyrousel': [
+        'resources/shaders/*.vs',
+        'resources/shaders/*.fs',
+        'resources/models/obj/*.obj',
+        'resources/models/gltf/*.glb',
+        'resources/models/collada/*.dae'
+    ]},
     install_requires=[
-        # python-glcontext
-        # python-moderngl
-        # python-moderngl-window
-        # python-glfw
-        # python-imgui
-        # python-easygui
-        # python-blinker
+        "scipy",
+        'pyrr',
+        "pyopengl",
+        "glcontext",
+        "moderngl",
+        "moderngl-window",
+        "glfw",
+        "imgui",
+        'tk',
+        "easygui",
+        "blinker",
+        'pycollada',
+        "trimesh"
     ],
     entry_points={
         'console_scripts': [

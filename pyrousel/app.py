@@ -1,4 +1,4 @@
-from pyrousel.appwindow import AppWindow
+from .appwindow import AppWindow
 
 def Run() -> None:
     print('Running Pyrousel...')

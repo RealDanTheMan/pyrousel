@@ -1,6 +1,6 @@
-import numpy as np
 from pyrr import Matrix44, Vector3
-from pyrousel.transform import Transform
+
+from .transform import Transform
 
 class Camera(object):
     def __init__(self):

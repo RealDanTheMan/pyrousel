@@ -1,5 +1,5 @@
 import numpy as np
-from pyrr import Matrix44, Vector3, quaternion
+from pyrr import Matrix44, Matrix33, Vector3
 
 class Transform(object):
     def __init__(self):
@@ -114,7 +114,8 @@ class Transform(object):
 
     def __RecomputeMatrix(self) -> None:
         """ Recalculates internal composite transform matrix """
-        self.__final = self.__tr * self.__rot_x * self.__rot_y * self.__rot_z * self.__scale
+        rot_order = self.__rot_z * self.__rot_y * self.__rot_x
+        self.__final = self.__tr * rot_order * self.__scale
 
     def GetTranslation(self) -> Vector3:
         """ Returns current translation """
@@ -126,21 +127,7 @@ class Transform(object):
 
     def GetRotation(self) -> Vector3:
         """Returns current rotation"""
-        xQuat = self.__rot_x.decompose()[1]
-        yQuat = self.__rot_y.decompose()[1]
-        zQuat = self.__rot_z.decompose()[1]
-
-        return Vector3([
-            quaternion.rotation_angle(xQuat),
-            quaternion.rotation_angle(yQuat),
-            quaternion.rotation_angle(zQuat)
-        ])
-
-        xangle = euler.matrx44.to_eulers(xrot)
-        yangle = euler.Matrix44(xrot).angles[0]
-        zangle = euler.Matrix44(xrot).angles[0]
-
-        return Vector3([xangle, yangle, zangle])
+        return Transform.GetEulerAngles(self.GetMatrix())
 
     def GetScale(self) -> Vector3:
         """ Returns current scale """
@@ -149,3 +136,21 @@ class Transform(object):
         z = self.__scale[2,2]
 
         return Vector3([x, y, z])
+
+    @staticmethod
+    def GetEulerAngles(mat: Matrix44) -> Vector3:
+        """Calculates euler angles representation of current rotation in radians"""
+        rot_mat = Matrix33.from_matrix44(mat)
+        sy = np.sqrt(rot_mat[0, 0] ** 2 + rot_mat[1, 0] ** 2)
+        singular = sy < 1e-6
+
+        if not singular:
+            xangle = np.arctan2(rot_mat[2, 1], rot_mat[2, 2])
+            yangle = np.arctan2(-rot_mat[2, 0], sy)
+            zangle = np.arctan2(rot_mat[1, 0], rot_mat[0, 0])
+        else:
+            xangle = np.arctan2(-rot_mat[1, 2], rot_mat[1, 1])
+            yangle = np.arctan2(-rot_mat[2, 0], sy)
+            zangle = 0.0
+
+        return Vector3([xangle, yangle, zangle])
