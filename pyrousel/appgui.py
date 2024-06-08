@@ -70,7 +70,7 @@ class SceneStatsPanel(object):
             imgui.text('FPS: ')
             imgui.same_line(position=200)
             imgui.input_int('##FPS', self.fps, flags=imgui.INPUT_TEXT_READ_ONLY)
-            imgui.text('Frame Time: ')
+            imgui.text('Frame Time (ms): ')
             imgui.same_line(position=200)
             imgui.input_float('##Frame Time', self.frame_time, flags=imgui.INPUT_TEXT_READ_ONLY)
             imgui.text('Frames: ')
