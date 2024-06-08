@@ -56,6 +56,7 @@ class AppGUI(object):
 class SceneStatsPanel(object):
     def __init__(self):
         self.fps = 0
+        self.frame_time = 0.0
         self.frames = 0
         self.num_vertex: int = 0
         self.num_triangles: int = 0
@@ -69,6 +70,9 @@ class SceneStatsPanel(object):
             imgui.text('FPS: ')
             imgui.same_line(position=200)
             imgui.input_int('##FPS', self.fps, flags=imgui.INPUT_TEXT_READ_ONLY)
+            imgui.text('Frame Time: ')
+            imgui.same_line(position=200)
+            imgui.input_float('##Frame Time', self.frame_time, flags=imgui.INPUT_TEXT_READ_ONLY)
             imgui.text('Frames: ')
             imgui.same_line(position=200)
             imgui.input_int('##Frame', self.frames, flags=imgui.INPUT_TEXT_READ_ONLY)

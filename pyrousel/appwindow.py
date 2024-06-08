@@ -106,6 +106,7 @@ class AppWindow(object):
         self.gui.scene_stats.min_ext = self.model.minext
         self.gui.scene_stats.max_ext = self.model.maxext
         self.gui.scene_stats.fps = self.frame_counter.GetFPS()
+        self.gui.scene_stats.frame_time = self.frame_counter.GetFrameTime()
         self.gui.scene_stats.frames = self.frame_counter.GetFrames()
 
         self.gui.overlays.wireframe_mode = self.render_hints.wireframe_mode
@@ -207,6 +208,7 @@ class FrameCounter(object):
         self.__current: float = 0.0
         self.__last: float = 0.0
         self.__frames: int = 0
+        self.__frameTime: float = 0.0
         self.__fps: int = 0
         self.__max_samples: int = max_samples
         self.__samples: list(float) = [0] * self.__max_samples
@@ -227,7 +229,10 @@ class FrameCounter(object):
         self.__current = time.time()
         self.__samples[self.__sample_idx] = self.__current - self.__last
         self.__frames += 1
-        self.__fps = int(1.0 / (sum(self.__samples) / self.__max_samples))
+
+        sample_time = (sum(self.__samples) / self.__max_samples)
+        self.__frameTime = sample_time * 1000.0
+        self.__fps = int(1.0 / sample_time)
 
         if self.__sample_idx < self.__max_samples - 1:
             self.__sample_idx += 1
@@ -241,3 +246,7 @@ class FrameCounter(object):
     def GetFrames(self) -> int:
         """Returns frame count since the counter start"""
         return self.__frames
+
+    def GetFrameTime(self) -> float:
+        """Returns average frame timein milliseconds across all the samples"""
+        return self.__frameTime
