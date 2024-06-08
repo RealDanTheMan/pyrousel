@@ -16,7 +16,6 @@ class AppWindow(object):
         self.__width = width
         self.__height = height
         self.__aspec_ratio = self.__width / self.__height
-        self.draw_gui = True
         self.render_hints = RenderHints()
         self.render_hints.wireframe_color = Vector4([0.0, 0.55, 0.0, 0.22])
         self.material_settings = MaterialSettings()
@@ -39,13 +38,16 @@ class AppWindow(object):
             raise Exception("GLFW Window failed to initialise properly!")
         else:
             glfw.make_context_current(self.__win)
+            glfw.set_key_callback(self.__win, self.OnKeyCallback)
             glfw.swap_interval(0)
 
         # App user interface (IMGui)
+        self.gui = None
         self.gui = AppGUI(self.__win)
         self.gui.import_settings.ModelRequestSignal.connect(self.OnModelRequested)
         self.gui.import_settings.ModelReloadSignal.connect(self.OnModelReloadRequested)
         self.gui.camera_settings.CameraFocusRequested.connect(self.OnCameraFocusRequested)
+        self.draw_gui = True
 
     def Init(self) -> None:
         """Initialises OpenGL graphics renderer"""
@@ -102,6 +104,9 @@ class AppWindow(object):
 
     def __UpdateUI(self) -> None:
         """Updates various UI properties"""
+        if self.gui is None:
+            return
+
         self.gui.import_settings.model_filepath = self.model_filepath
         self.gui.scene_stats.num_vertex = len(self.model.vertices) / 3
         self.gui.scene_stats.num_triangles = len(self.model.indices) / 3
@@ -143,6 +148,9 @@ class AppWindow(object):
 
     def __FetchUI(self) -> None:
         """Fetches property values from UI that influence the app behaviour"""
+        if self.gui is None:
+            return
+
         self.render_hints.visualiser_mode = self.gui.overlays.visualiser_mode
         self.render_hints.wireframe_mode = self.gui.overlays.wireframe_mode
         self.render_hints.wireframe_color = Vector4(self.gui.overlays.wireframe_color)
@@ -178,6 +186,7 @@ class AppWindow(object):
 
     def __UpdateScene(self) -> None:
         """Updates the scene"""
+        self.__ProcessInputs()
         if self.model and self.enable_carousel:
             self.model.transform.Rotate(0.0, 0.02, 0.0)
 
@@ -189,20 +198,33 @@ class AppWindow(object):
         self.graphics.light_value = self.light_color * self.light_intensity
         self.graphics.RenderModel(self.model, self.render_hints, self.material_settings)
         
-        if self.draw_gui:
+        if self.gui is not None and self.draw_gui:
             self.gui.Render()
         
         glfw.swap_buffers(self.__win)
 
+    def __ProcessInputs(self) -> None:
+        """Process window key and mouse inputs"""
+        glfw.poll_events()
+        if self.gui is not None and self.draw_gui:
+            self.gui.ProcessInputs()
+
     def Run(self) -> None:
         """Updates & Draw active scene continusely until window closes"""
         while not glfw.window_should_close(self.__win):
-            glfw.poll_events()
-            self.frame_counter.Update()
             self.__FetchUI()
             self.__UpdateUI()
             self.__UpdateScene()
             self.__RenderScene()
+            self.frame_counter.Update()
+
+    def OnKeyCallback(self, window, key, scancode, action, mods) -> None:
+        """Event handler for GLFW key input callbacks"""
+        if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
+            glfw.set_window_should_close(window, True)
+
+        if key == glfw.KEY_X and action == glfw.PRESS:
+            self.draw_gui = not self.draw_gui
 
     def Quit(self) -> None:
         self.gui.Shutdown()
