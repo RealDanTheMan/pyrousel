@@ -11,7 +11,7 @@ from .gfx import VisualiserMode, WireframeMode
 class AppGUI(object):
     def __init__(self, win_handle: _GLFWwindow):
         imgui.create_context()
-        self.__impl = IMRenderer(win_handle)
+        self.__impl = IMRenderer(win_handle, attach_callbacks=True)
         self.import_settings = ImportSettingsPanel()
         self.scene_stats = SceneStatsPanel()
         self.overlays = OverlaysPanel()
@@ -20,14 +20,12 @@ class AppGUI(object):
         self.light_settings = LightSettingsPanel()
         self.transforms = TransformsPanel()
 
-    def __ProcessInputs(self) -> None:
+    def ProcessInputs(self) -> None:
         imgui.capture_mouse_from_app(True)
         self.__impl.process_inputs()
 
     def __Update(self) -> None:
         """Process GUI inputs and builds UI widgets"""
-        self.__ProcessInputs()
-        
         imgui.new_frame()
         imgui.begin("Property Panel")
         self.import_settings.Update()
