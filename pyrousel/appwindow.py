@@ -12,7 +12,7 @@ from .model import ModelLoader
 from .camera import Camera
 
 class AppWindow(object):
-    def __init__(self, width: int = 1280, height: int = 720):
+    def __init__(self, width: int = 1280, height: int = 720, enable_gui=True):
         self.__width = width
         self.__height = height
         self.__aspec_ratio = self.__width / self.__height
@@ -42,12 +42,15 @@ class AppWindow(object):
             glfw.swap_interval(0)
 
         # App user interface (IMGui)
-        self.gui = None
-        self.gui = AppGUI(self.__win)
-        self.gui.import_settings.ModelRequestSignal.connect(self.OnModelRequested)
-        self.gui.import_settings.ModelReloadSignal.connect(self.OnModelReloadRequested)
-        self.gui.camera_settings.CameraFocusRequested.connect(self.OnCameraFocusRequested)
-        self.draw_gui = True
+        if enable_gui:
+            self.gui = AppGUI(self.__win)
+            self.gui.import_settings.ModelRequestSignal.connect(self.OnModelRequested)
+            self.gui.import_settings.ModelReloadSignal.connect(self.OnModelReloadRequested)
+            self.gui.camera_settings.CameraFocusRequested.connect(self.OnCameraFocusRequested)
+            self.draw_gui = True
+        else:
+            self.gui = None
+            self.draw_gui = False
 
     def Init(self) -> None:
         """Initialises OpenGL graphics renderer"""

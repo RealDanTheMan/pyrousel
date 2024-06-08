@@ -30,9 +30,8 @@ def Run(settings: ApplicationSettings = ApplicationSettings()) -> None:
     print(f'--Startup model: {settings.startup_model}')
     print('\n')
     
-    app_window = AppWindow(settings.window_width, settings.window_height)
+    app_window = AppWindow(settings.window_width, settings.window_height, settings.enable_gui)
     app_window.Init()
-    app_window.draw_gui = settings.enable_gui
 
     if settings.startup_model is not None:
         app_window.OnModelRequested(settings.startup_model)
