@@ -38,6 +38,7 @@ class AppWindow(object):
             raise Exception("GLFW Window failed to initialise properly!")
         else:
             glfw.make_context_current(self.__win)
+            glfw.swap_interval(0)
 
         # App user interface (IMGui)
         self.gui = AppGUI(self.__win)
