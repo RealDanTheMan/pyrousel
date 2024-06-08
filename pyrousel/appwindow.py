@@ -55,6 +55,7 @@ class AppWindow(object):
     def Init(self) -> None:
         """Initialises OpenGL graphics renderer"""
         self.graphics = GFX(mgl.create_context())
+        self.graphics.PrintDeviceInfo()
         self.camera = Camera()
         self.camera.aspect = self.__aspec_ratio
         self.camera.fov = 30.0

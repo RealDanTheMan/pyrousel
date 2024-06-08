@@ -262,3 +262,17 @@ class GFX(object):
         self.GetContext().wireframe = True
         self.GetContext().polygon_offset = (-10,-10)
         renderable.render()
+
+    def PrintDeviceInfo(self) -> None:
+        """
+        Writes OpenGL context device info to the console output
+        """
+        device = self.GetContext().info['GL_RENDERER']
+        vendor = self.GetContext().info['GL_VENDOR']
+        version =self.GetContext().info['GL_VERSION']
+
+        print('OpenGL context info:')
+        print('--------------------')
+        print(f'Device: {device}')
+        print(f'Vendor: {vendor}')
+        print(f'Version: {version}\n')
