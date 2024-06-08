@@ -16,6 +16,7 @@ class AppWindow(object):
         self.__width = width
         self.__height = height
         self.__aspec_ratio = self.__width / self.__height
+        self.draw_gui = True
         self.render_hints = RenderHints()
         self.render_hints.wireframe_color = Vector4([0.0, 0.55, 0.0, 0.22])
         self.material_settings = MaterialSettings()
@@ -187,7 +188,10 @@ class AppWindow(object):
         self.graphics.SetPerspectiveMatrix(self.camera.GetPerspectiveMatrix())
         self.graphics.light_value = self.light_color * self.light_intensity
         self.graphics.RenderModel(self.model, self.render_hints, self.material_settings)
-        self.gui.Render()
+        
+        if self.draw_gui:
+            self.gui.Render()
+        
         glfw.swap_buffers(self.__win)
 
     def Run(self) -> None:
