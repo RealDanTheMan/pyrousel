@@ -270,9 +270,11 @@ class GFX(object):
         device = self.GetContext().info['GL_RENDERER']
         vendor = self.GetContext().info['GL_VENDOR']
         version =self.GetContext().info['GL_VERSION']
+        version_code = self.GetContext().version_code
 
         print('OpenGL context info:')
         print('--------------------')
         print(f'Device: {device}')
         print(f'Vendor: {vendor}')
-        print(f'Version: {version}\n')
+        print(f'Version: {version}')
+        print(f'Version Code: {version_code}\n')
