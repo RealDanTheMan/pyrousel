@@ -11,7 +11,7 @@ from .gfx import VisualiserMode, WireframeMode
 class AppGUI(object):
     def __init__(self, win_handle: _GLFWwindow):
         imgui.create_context()
-        self.__impl = IMRenderer(win_handle)
+        self.__impl = IMRenderer(win_handle, attach_callbacks=True)
         self.import_settings = ImportSettingsPanel()
         self.scene_stats = SceneStatsPanel()
         self.overlays = OverlaysPanel()
@@ -20,14 +20,12 @@ class AppGUI(object):
         self.light_settings = LightSettingsPanel()
         self.transforms = TransformsPanel()
 
-    def __ProcessInputs(self) -> None:
+    def ProcessInputs(self) -> None:
         imgui.capture_mouse_from_app(True)
         self.__impl.process_inputs()
 
     def __Update(self) -> None:
         """Process GUI inputs and builds UI widgets"""
-        self.__ProcessInputs()
-        
         imgui.new_frame()
         imgui.begin("Property Panel")
         self.import_settings.Update()
@@ -56,6 +54,7 @@ class AppGUI(object):
 class SceneStatsPanel(object):
     def __init__(self):
         self.fps = 0
+        self.frame_time = 0.0
         self.frames = 0
         self.num_vertex: int = 0
         self.num_triangles: int = 0
@@ -69,6 +68,9 @@ class SceneStatsPanel(object):
             imgui.text('FPS: ')
             imgui.same_line(position=200)
             imgui.input_int('##FPS', self.fps, flags=imgui.INPUT_TEXT_READ_ONLY)
+            imgui.text('Frame Time (ms): ')
+            imgui.same_line(position=200)
+            imgui.input_float('##Frame Time', self.frame_time, flags=imgui.INPUT_TEXT_READ_ONLY)
             imgui.text('Frames: ')
             imgui.same_line(position=200)
             imgui.input_int('##Frame', self.frames, flags=imgui.INPUT_TEXT_READ_ONLY)

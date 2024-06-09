@@ -1,2 +1,2 @@
-from .app import Run
-Run()
+from .app import Main
+Main()

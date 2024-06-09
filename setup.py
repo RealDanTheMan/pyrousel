@@ -33,7 +33,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'pyrousel=pyrousel.app:Run'
+            'pyrousel=pyrousel.app:Main'
         ]
     }
 )

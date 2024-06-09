@@ -1,5 +1,8 @@
 *.pyc
 *.pyo
+.dockerignore
+*.egg-info/
+.vscode/
 bin/
 build/
 dist/

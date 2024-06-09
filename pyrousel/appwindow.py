@@ -12,7 +12,7 @@ from .model import ModelLoader
 from .camera import Camera
 
 class AppWindow(object):
-    def __init__(self, width: int = 1280, height: int = 720):
+    def __init__(self, width: int = 1280, height: int = 720, enable_gui=True):
         self.__width = width
         self.__height = height
         self.__aspec_ratio = self.__width / self.__height
@@ -32,22 +32,34 @@ class AppWindow(object):
         if not glfw.init():
             raise Exception("GLFW failed to initialise!")
         
+        glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
+        glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
+        glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
         self.__win = glfw.create_window(width, height, "Window Label", None, None)
+        
         if not self.__win:
             glfw.terminate()
             raise Exception("GLFW Window failed to initialise properly!")
         else:
             glfw.make_context_current(self.__win)
+            glfw.set_key_callback(self.__win, self.OnKeyCallback)
+            glfw.swap_interval(0)
 
         # App user interface (IMGui)
-        self.gui = AppGUI(self.__win)
-        self.gui.import_settings.ModelRequestSignal.connect(self.OnModelRequested)
-        self.gui.import_settings.ModelReloadSignal.connect(self.OnModelReloadRequested)
-        self.gui.camera_settings.CameraFocusRequested.connect(self.OnCameraFocusRequested)
+        if enable_gui:
+            self.gui = AppGUI(self.__win)
+            self.gui.import_settings.ModelRequestSignal.connect(self.OnModelRequested)
+            self.gui.import_settings.ModelReloadSignal.connect(self.OnModelReloadRequested)
+            self.gui.camera_settings.CameraFocusRequested.connect(self.OnCameraFocusRequested)
+            self.draw_gui = True
+        else:
+            self.gui = None
+            self.draw_gui = False
 
     def Init(self) -> None:
         """Initialises OpenGL graphics renderer"""
         self.graphics = GFX(mgl.create_context())
+        self.graphics.PrintDeviceInfo()
         self.camera = Camera()
         self.camera.aspect = self.__aspec_ratio
         self.camera.fov = 30.0
@@ -100,12 +112,16 @@ class AppWindow(object):
 
     def __UpdateUI(self) -> None:
         """Updates various UI properties"""
+        if self.gui is None:
+            return
+
         self.gui.import_settings.model_filepath = self.model_filepath
         self.gui.scene_stats.num_vertex = len(self.model.vertices) / 3
         self.gui.scene_stats.num_triangles = len(self.model.indices) / 3
         self.gui.scene_stats.min_ext = self.model.minext
         self.gui.scene_stats.max_ext = self.model.maxext
         self.gui.scene_stats.fps = self.frame_counter.GetFPS()
+        self.gui.scene_stats.frame_time = self.frame_counter.GetFrameTime()
         self.gui.scene_stats.frames = self.frame_counter.GetFrames()
 
         self.gui.overlays.wireframe_mode = self.render_hints.wireframe_mode
@@ -140,6 +156,9 @@ class AppWindow(object):
 
     def __FetchUI(self) -> None:
         """Fetches property values from UI that influence the app behaviour"""
+        if self.gui is None:
+            return
+
         self.render_hints.visualiser_mode = self.gui.overlays.visualiser_mode
         self.render_hints.wireframe_mode = self.gui.overlays.wireframe_mode
         self.render_hints.wireframe_color = Vector4(self.gui.overlays.wireframe_color)
@@ -175,6 +194,7 @@ class AppWindow(object):
 
     def __UpdateScene(self) -> None:
         """Updates the scene"""
+        self.__ProcessInputs()
         if self.model and self.enable_carousel:
             self.model.transform.Rotate(0.0, 0.02, 0.0)
 
@@ -185,18 +205,34 @@ class AppWindow(object):
         self.graphics.SetPerspectiveMatrix(self.camera.GetPerspectiveMatrix())
         self.graphics.light_value = self.light_color * self.light_intensity
         self.graphics.RenderModel(self.model, self.render_hints, self.material_settings)
-        self.gui.Render()
+        
+        if self.gui is not None and self.draw_gui:
+            self.gui.Render()
+        
         glfw.swap_buffers(self.__win)
+
+    def __ProcessInputs(self) -> None:
+        """Process window key and mouse inputs"""
+        glfw.poll_events()
+        if self.gui is not None and self.draw_gui:
+            self.gui.ProcessInputs()
 
     def Run(self) -> None:
         """Updates & Draw active scene continusely until window closes"""
         while not glfw.window_should_close(self.__win):
-            glfw.poll_events()
-            self.frame_counter.Update()
             self.__FetchUI()
             self.__UpdateUI()
             self.__UpdateScene()
             self.__RenderScene()
+            self.frame_counter.Update()
+
+    def OnKeyCallback(self, window, key, scancode, action, mods) -> None:
+        """Event handler for GLFW key input callbacks"""
+        if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
+            glfw.set_window_should_close(window, True)
+
+        if key == glfw.KEY_X and action == glfw.PRESS:
+            self.draw_gui = not self.draw_gui
 
     def Quit(self) -> None:
         self.gui.Shutdown()
@@ -207,6 +243,7 @@ class FrameCounter(object):
         self.__current: float = 0.0
         self.__last: float = 0.0
         self.__frames: int = 0
+        self.__frameTime: float = 0.0
         self.__fps: int = 0
         self.__max_samples: int = max_samples
         self.__samples: list(float) = [0] * self.__max_samples
@@ -227,7 +264,10 @@ class FrameCounter(object):
         self.__current = time.time()
         self.__samples[self.__sample_idx] = self.__current - self.__last
         self.__frames += 1
-        self.__fps = int(1.0 / (sum(self.__samples) / self.__max_samples))
+
+        sample_time = (sum(self.__samples) / self.__max_samples)
+        self.__frameTime = sample_time * 1000.0
+        self.__fps = int(1.0 / sample_time)
 
         if self.__sample_idx < self.__max_samples - 1:
             self.__sample_idx += 1
@@ -241,3 +281,7 @@ class FrameCounter(object):
     def GetFrames(self) -> int:
         """Returns frame count since the counter start"""
         return self.__frames
+
+    def GetFrameTime(self) -> float:
+        """Returns average frame timein milliseconds across all the samples"""
+        return self.__frameTime

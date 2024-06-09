@@ -139,6 +139,10 @@ class GFXTest(unittest.TestCase):
     def __CreateDummyContext(self):
         if not glfw.init():
             return None
+        glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
+        glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
+        glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+        
         win = glfw.create_window(512, 512, "Test", None, None)
         if win is None:
             self.__DestroyDummyContext()
