@@ -32,7 +32,11 @@ class AppWindow(object):
         if not glfw.init():
             raise Exception("GLFW failed to initialise!")
         
+        glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
+        glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
+        glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
         self.__win = glfw.create_window(width, height, "Window Label", None, None)
+        
         if not self.__win:
             glfw.terminate()
             raise Exception("GLFW Window failed to initialise properly!")
