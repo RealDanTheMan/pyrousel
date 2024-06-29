@@ -46,6 +46,7 @@ class AppWindow(object):
         else:
             glfw.make_context_current(self.__win)
             glfw.set_key_callback(self.__win, self.OnKeyCallback)
+            glfw.set_framebuffer_size_callback(self.__win, self.OnWindowResizeCallback)
             glfw.swap_interval(int(self.__enable_vsync))
 
         # App user interface (IMGui)
@@ -244,6 +245,14 @@ class AppWindow(object):
 
         if key == glfw.KEY_X and action == glfw.PRESS:
             self.draw_gui = not self.draw_gui
+
+    def OnWindowResizeCallback(self, window: glfw._GLFWwindow, width: int, height: int) -> None:
+        self.__width = width
+        self.__height = height
+        self.__aspec_ratio = width / height
+
+        if self.camera is not None:
+            self.camera.aspect = self.__aspec_ratio
 
     def Quit(self) -> None:
         self.gui.Shutdown()
