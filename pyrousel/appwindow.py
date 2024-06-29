@@ -12,10 +12,11 @@ from .model import ModelLoader
 from .camera import Camera
 
 class AppWindow(object):
-    def __init__(self, width: int = 1280, height: int = 720, enable_gui=True):
+    def __init__(self, width: int = 1280, height: int = 720, enable_gui: bool = True, vsync: bool = False):
         self.__width = width
         self.__height = height
         self.__aspec_ratio = self.__width / self.__height
+        self.__enable_vsync = vsync
         self.render_hints = RenderHints()
         self.render_hints.wireframe_color = Vector4([0.0, 0.55, 0.0, 0.22])
         self.material_settings = MaterialSettings()
@@ -23,6 +24,8 @@ class AppWindow(object):
         self.material_settings.roughness = 0.5
         self.material_settings.spec_intensity = 0.7
         self.enable_carousel = True
+        self.frame_interpolator = FrameInterpolator()
+        self.frame_interpolator.RegisterFrame()
         self.frame_counter = FrameCounter()
         self.frame_counter.Start()
         self.light_color = Vector3([1,1,1])
@@ -43,7 +46,7 @@ class AppWindow(object):
         else:
             glfw.make_context_current(self.__win)
             glfw.set_key_callback(self.__win, self.OnKeyCallback)
-            glfw.swap_interval(0)
+            glfw.swap_interval(int(self.__enable_vsync))
 
         # App user interface (IMGui)
         if enable_gui:
@@ -123,6 +126,7 @@ class AppWindow(object):
         self.gui.scene_stats.fps = self.frame_counter.GetFPS()
         self.gui.scene_stats.frame_time = self.frame_counter.GetFrameTime()
         self.gui.scene_stats.frames = self.frame_counter.GetFrames()
+        self.gui.scene_stats.vsync = self.__enable_vsync
 
         self.gui.overlays.wireframe_mode = self.render_hints.wireframe_mode
         self.gui.overlays.visualise_state = self.render_hints.visualiser_mode
@@ -158,6 +162,10 @@ class AppWindow(object):
         """Fetches property values from UI that influence the app behaviour"""
         if self.gui is None:
             return
+        
+        if self.__enable_vsync != self.gui.scene_stats.vsync:
+            self.__enable_vsync = self.gui.scene_stats.vsync
+            glfw.swap_interval(int(self.__enable_vsync))
 
         self.render_hints.visualiser_mode = self.gui.overlays.visualiser_mode
         self.render_hints.wireframe_mode = self.gui.overlays.wireframe_mode
@@ -192,11 +200,13 @@ class AppWindow(object):
             scale_z = self.gui.transforms.scale[2]
             self.model.transform.SetScale(scale_x, scale_y, scale_z)
 
-    def __UpdateScene(self) -> None:
+    def __UpdateScene(self, delta_time: float) -> None:
         """Updates the scene"""
         self.__ProcessInputs()
         if self.model and self.enable_carousel:
-            self.model.transform.Rotate(0.0, 0.02, 0.0)
+            angle = np.radians(180.0)
+            rotation = Vector3([0.0, angle, 0.0]) * delta_time
+            self.model.transform.Rotate(rotation.x, rotation.y, rotation.z)
 
     def __RenderScene(self) -> None:
         """Draws active scene content to the screen"""
@@ -222,9 +232,10 @@ class AppWindow(object):
         while not glfw.window_should_close(self.__win):
             self.__FetchUI()
             self.__UpdateUI()
-            self.__UpdateScene()
+            self.__UpdateScene(self.frame_interpolator.GetDelta())
             self.__RenderScene()
             self.frame_counter.Update()
+            self.frame_interpolator.RegisterFrame()
 
     def OnKeyCallback(self, window, key, scancode, action, mods) -> None:
         """Event handler for GLFW key input callbacks"""
@@ -285,3 +296,17 @@ class FrameCounter(object):
     def GetFrameTime(self) -> float:
         """Returns average frame timein milliseconds across all the samples"""
         return self.__frameTime
+
+class FrameInterpolator(object) :
+    def __init__(self) -> None:
+        self.__last: float = time.time()
+        self.__current: float = time.time()
+        self.__delta: float = 0.0
+
+    def GetDelta(self) -> float :
+        return self.__delta
+    
+    def RegisterFrame(self) -> None:
+        self.__last = self.__current
+        self.__current = time.time()
+        self.__delta = self.__current - self.__last
