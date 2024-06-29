@@ -60,11 +60,12 @@ class SceneStatsPanel(object):
         self.num_triangles: int = 0
         self.min_ext = [0.0, 0.0, 0.0]
         self.max_ext = [0.0, 0.0, 0.0]
+        self.vsync = False
 
     def Update(self) -> None:
         """Builds IMGui widgest that make this panel"""
         if imgui.collapsing_header("Scene Settings")[0]:
-            imgui.begin_child("#Scene Settings Panel", width=0, height=150, border=True)
+            imgui.begin_child("#Scene Settings Panel", width=0, height=200, border=True)
             imgui.text('FPS: ')
             imgui.same_line(position=200)
             imgui.input_int('##FPS', self.fps, flags=imgui.INPUT_TEXT_READ_ONLY)
@@ -99,6 +100,10 @@ class SceneStatsPanel(object):
                 self.max_ext[2],
                 flags=imgui.INPUT_TEXT_READ_ONLY
             )
+
+            imgui.text('VSync Enabled:')
+            imgui.same_line(position=200)
+            _, self.vsync = imgui.checkbox('##VSync Enabled', self.vsync)
             
             imgui.end_child()
 
